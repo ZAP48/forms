@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>ZAP48 Admin (Stages Edition)</title>
+  <title>ZAP48 Admin (Stages Ultimate)</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
@@ -511,7 +511,14 @@
           </div>
           <label>Nome do Elenco (ex: Team Z)</label>
           <input id="c-name" placeholder="Nome do time/elenco">
-          <label>Selecionar Membros</label>
+          
+          <div style="margin-top:10px; padding:10px; background:#e3f2fd; border-radius:8px;">
+             <label style="margin-top:0; color:#1565c0; font-size:0.7rem;">⚡ Seleção Rápida de Time (Adicionar todos)</label>
+             <select id="cast-quick-team" class="team-select" style="margin-bottom:0;" onchange="quickSelectTeamForCast(this.value)">
+                 </select>
+          </div>
+
+          <label>Selecionar Membros Individualmente</label>
           <input type="text" id="cast-search" placeholder="Filtrar membros..." oninput="renderCastSelection(this.value)" style="margin-bottom:10px;">
           <div id="cast-selection-grid" class="selection-grid"></div>
           <button class="btn-main" onclick="saveCastToStage()">Confirmar Elenco</button>
@@ -546,6 +553,14 @@
         <div id="row-inputs"></div>
         <div class="row-sum">Soma: <b id="rows-sum" style="color:#00b894;">16</b> / <b id="rows-total">16</b></div>
       </div>
+
+      <div style="background: #fff3cd; padding: 10px; border-radius: 8px; margin-top: 15px; border: 1px solid #ffeeba;">
+          <label style="margin-top:0; color:#856404;">✨ Auto-preencher (Música)</label>
+          <select id="b-auto-team" class="team-select" style="margin-bottom:0;">
+          </select>
+          <div style="font-size:0.7rem; color:#666; margin-top:4px;">Preenche as bolinhas automaticamente.</div>
+      </div>
+
       <button class="btn-main" onclick="startStage()">Montar</button>
     </div>
     <div id="step-2" class="builder-stage-area stage-area" style="display:none;">
@@ -608,8 +623,8 @@
 
     // === INICIALIZAÇÃO ===
     async function init() {
+        await loadMembers(); // Load members first so teams work
         populateTeamSelects();
-        await loadMembers();
         await loadStages();
         await loadDiscos();
     }
@@ -618,6 +633,12 @@
         const selects = document.querySelectorAll('.team-select');
         selects.forEach(sel => {
             sel.innerHTML = '';
+            // Opção vazia
+            const emptyOpt = document.createElement('option');
+            emptyOpt.value = "";
+            emptyOpt.text = "Selecione...";
+            sel.appendChild(emptyOpt);
+
             for (const [key, label] of Object.entries(TEAM_CONFIG)) {
                 const opt = document.createElement('option');
                 opt.value = label;
@@ -752,17 +773,17 @@
             const members = typeof cast.Membros === 'string' ? JSON.parse(cast.Membros) : cast.Membros;
             const pills = (members || []).map(m => `<span class="cast-member-pill">${m.name}</span>`).join('');
             
-            div.innerHTML += `
-                <div class="cast-item">
-                    <div class="cast-header">
-                        <span>${cast.Nome}</span>
-                        <div>
-                            <button type="button" style="color:blue; cursor:pointer; background:none; border:none;" onclick="editCast(${idx})">Editar</button>
-                            <button type="button" style="color:red; cursor:pointer; background:none; border:none;" onclick="removeCast(${idx})">X</button>
-                        </div>
-                    </div>
-                    <div class="cast-members">${pills}</div>
-                </div>
+            div.innerHTML += `<br>
+                <div class="cast-item"><br>
+                    <div class="cast-header"><br>
+                        <span>${cast.Nome}</span><br>
+                        <div><br>
+                            <button type="button" style="color:blue; cursor:pointer; background:none; border:none;" onclick="editCast(${idx})">Editar</button><br>
+                            <button type="button" style="color:red; cursor:pointer; background:none; border:none;" onclick="removeCast(${idx})">X</button><br>
+                        </div><br>
+                    </div><br>
+                    <div class="cast-members">${pills}</div><br>
+                </div><br>
             `;
         });
     }
@@ -770,6 +791,7 @@
     function openCastModal() {
         document.getElementById('cast-modal').style.display = 'flex';
         document.getElementById('c-name').value = '';
+        document.getElementById('cast-quick-team').value = ""; // Reset quick team
         editingCastIndex = -1;
         renderCastSelection();
     }
@@ -804,7 +826,24 @@
             div.dataset.id = m.id;
             div.dataset.name = m.Nome;
             div.dataset.gen = m.Geracao;
+            div.dataset.team = m.Time; // For quick select
             grid.appendChild(div);
+        });
+    }
+
+    // --- NOVA FUNÇÃO: QUICK SELECT TEAM FOR CAST ---
+    function quickSelectTeamForCast(teamName) {
+        if (!teamName) return;
+        
+        // Change name input if empty
+        const nameInput = document.getElementById('c-name');
+        if(!nameInput.value) nameInput.value = teamName;
+
+        const items = document.querySelectorAll('#cast-selection-grid .select-item');
+        items.forEach(item => {
+            if (item.dataset.team === teamName) {
+                if (!item.classList.contains('selected')) item.classList.add('selected');
+            }
         });
     }
 
@@ -1065,6 +1104,7 @@
       if (!$('row-inputs').children.length) renderRowInputs();
       $('b-song').value = '';
       $('b-unit-name').value = '';
+      document.getElementById('b-auto-team').value = ""; // Reset auto team
       toggleKindRules();
       syncRowsUI();
     }
@@ -1084,27 +1124,97 @@
     function toggleKindRules() { const k=val('b-kind'); $('unit-fields').style.display=(k==='Unit')?'block':'none'; if(k==='Solo'){ $('b-total').value=1; $('b-centers').value=1; $('b-rowcount').value=1; renderRowInputs(); document.querySelector('.row-count-input').value=1; syncRowsUI(); } }
 
     function startStage() {
-        const t=parseInt(val('b-total'))||0, inps=[...document.querySelectorAll('.row-count-input')].map(i=>parseInt(i.value)||0);
-        if(inps.reduce((a,b)=>a+b,0)!==t) return alert("Soma incorreta.");
-        const c=parseInt(val('b-centers'))||0, f=inps[0]||0; let ci=[];
-        if(c>0&&f>0) { const s=Math.floor((f-c)/2); for(let k=0;k<c;k++) ci.push(s+k); }
-        $('slots').innerHTML=''; const rw=document.createElement('div'); rw.className='rows-wrap';
-        function bf(r,j){ const rc=inps[r]||0, cum=inps.slice(0,r+1).reduce((a,b)=>a+b,0); return (r===0)?(cum-rc+1)+j:cum-j; }
-        for(let r=inps.length-1;r>=0;r--){
-            const rd=document.createElement('div'); rw.className='slots-row'; const isf=(r===0);
-            for(let j=0;j<inps[r];j++){
-                const d=document.createElement('div'); d.className='slot'; if(isf&&ci.includes(j)) d.classList.add('is-center');
-                d.innerHTML=`<div class="slot-badge">${bf(r,j)}</div><div class="slot-circle"><i class="fas fa-plus" style="color:#ddd"></i></div><div class="slot-name">-</div>`;
-                d.onclick=()=>openMemberModalForBuilder(d); rd.appendChild(d);
+        const t = parseInt(val('b-total')) || 0;
+        const inps = [...document.querySelectorAll('.row-count-input')].map(i => parseInt(i.value) || 0);
+        
+        if (inps.reduce((a, b) => a + b, 0) !== t) return alert("Soma incorreta.");
+        
+        const c = parseInt(val('b-centers')) || 0;
+        const f = inps[0] || 0; 
+        let ci = [];
+        if (c > 0 && f > 0) { 
+            const s = Math.floor((f - c) / 2); 
+            for (let k = 0; k < c; k++) ci.push(s + k); 
+        }
+
+        // --- AUTO-PREENCHIMENTO (BUILDER) ---
+        const autoTeam = document.getElementById('b-auto-team').value;
+        let membersToFill = [];
+        
+        if (autoTeam && autoTeam !== "") {
+            membersToFill = allMembers.filter(m => 
+                m.Time === autoTeam && 
+                ['Ativa'].includes(m.Status)
+            );
+        }
+        let fillIndex = 0;
+        // -------------------------
+
+        $('slots').innerHTML = ''; 
+        const rw = document.createElement('div'); 
+        rw.className = 'rows-wrap'; 
+
+        // Visual: Fundo (length-1) no topo, Frente (0) embaixo
+        for (let r = inps.length - 1; r >= 0; r--) {
+            const rd = document.createElement('div'); 
+            rd.className = 'slots-row'; 
+            const isFront = (r === 0);
+
+            // Numeração: Frente (0) começa em 1
+            let startBadge = 1;
+            for(let k = 0; k < r; k++) {
+                startBadge += inps[k];
+            }
+
+            for (let j = 0; j < inps[r]; j++) {
+                const d = document.createElement('div'); 
+                d.className = 'slot'; 
+                
+                if (isFront && ci.includes(j)) d.classList.add('is-center');
+                
+                // Verifica se deve auto-preencher
+                let assignedMember = null;
+                let innerContent = '';
+
+                if (autoTeam && fillIndex < membersToFill.length) {
+                    assignedMember = membersToFill[fillIndex];
+                    fillIndex++;
+                    const p = assignedMember.Foto || 'https://placehold.co/100?text=?';
+                    innerContent = `
+                        <div class="slot-badge">${startBadge + j}</div>
+                        <div class="slot-circle"><img src="${p}" onerror="this.src='https://placehold.co/100?text=?'"></div>
+                        <div class="slot-name">${assignedMember.Nome}</div>
+                    `;
+                } else {
+                    innerContent = `
+                        <div class="slot-badge">${startBadge + j}</div>
+                        <div class="slot-circle"><i class="fas fa-plus" style="color:#ddd"></i></div>
+                        <div class="slot-name">-</div>
+                    `;
+                }
+                
+                d.innerHTML = innerContent;
+
+                if (assignedMember) {
+                    d.dataset.id = assignedMember.id;
+                    d.dataset.name = assignedMember.Nome;
+                    d.dataset.gen = assignedMember.Geracao;
+                }
+
+                d.onclick = () => openMemberModalForBuilder(d); 
+                rd.appendChild(d);
             }
             rw.appendChild(rd);
         }
-        $('slots').appendChild(rw); $('step-1').style.display='none'; $('step-2').style.display='block';
+        
+        $('slots').appendChild(rw); 
+        $('step-1').style.display = 'none'; 
+        $('step-2').style.display = 'block';
     }
 
     function openMemberModalForBuilder(el) { activeSlot=el; $('member-select-modal').style.display='flex'; $('member-search').value=''; renderMemberSelectionList(''); }
     function closeMemberModal() { $('member-select-modal').style.display='none'; activeSlot=null; }
-    function selectMember(m) { if(!activeSlot)return; const p=resolveImage(m.photo)||'https://placehold.co/100?text=?'; activeSlot.querySelector('.slot-circle').innerHTML=`<img src="${p}" onerror="this.src='https://placehold.co/100?text=?'">`; activeSlot.querySelector('.slot-name').innerText=m.name; activeSlot.dataset.id=m.id; activeSlot.dataset.name=m.name; activeSlot.dataset.gen=m.gen||''; closeMemberModal(); }
+    function selectMember(m) { if(!activeSlot)return; const p=m.Foto||'https://placehold.co/100?text=?'; activeSlot.querySelector('.slot-circle').innerHTML=`<img src="${p}" onerror="this.src='https://placehold.co/100?text=?'">`; activeSlot.querySelector('.slot-name').innerText=m.Nome; activeSlot.dataset.id=m.id; activeSlot.dataset.name=m.Nome; activeSlot.dataset.gen=m.Geracao||''; closeMemberModal(); }
     function clearSlot() { if(activeSlot){ activeSlot.querySelector('.slot-circle').innerHTML='<i class="fas fa-plus" style="color:#ddd"></i>'; activeSlot.querySelector('.slot-name').innerText='-'; delete activeSlot.dataset.id; delete activeSlot.dataset.name; delete activeSlot.dataset.gen; } closeMemberModal(); }
     
     function finishTrack() {
@@ -1134,11 +1244,11 @@
         forms += `<div class="formation-group"><div class="formation-title">${(String(t.kind) === 'Unit') ? '<i class="fas fa-users"></i>' : ''} ${t.name}</div><div class="member-grid">`;
         (t.members || []).forEach(mem => {
           let full = allMembers.find(am => am.id == mem.id);
-          if (!full && mem.name) full = allMembers.find(am => am.name === mem.name);
+          if (!full && mem.name) full = allMembers.find(am => am.Nome === mem.name);
           const centerClass = mem.isCenter ? 'is-center' : '';
-          const photo = full?.photo || 'https://placehold.co/300?text=?';
-          const name = full?.name || mem.name || '???';
-          const genTxt = formatGen(full?.gen || mem.gen || '');
+          const photo = full?.Foto || 'https://placehold.co/300?text=?';
+          const name = full?.Nome || mem.name || '???';
+          const genTxt = formatGen(full?.Geracao || mem.gen || '');
           if (full) mem.id = full.id;
           forms += `<a class="member-card-static ${centerClass}" data-id="${mem.id || ''}"><div class="member-photo"><img src="${photo}" loading="lazy"></div><div class="member-info"><h3>${name}</h3><p>${genTxt || ''}</p></div></a>`;
         });
@@ -1154,6 +1264,9 @@
     function formatGen(g) { const n=g?String(g).replace(/\D/g,''):''; return n?`${n}ª Gen`:''; }
     function parseHTMLToTracks(h) { if(!h)return[]; const t=document.createElement('div'); t.innerHTML=h; const el=t.querySelector('#ctl48-formation-data'); if(el){ try{return JSON.parse(el.innerText).map(x=>({...x,html:null}));}catch(e){} } return []; }
 
+    // Helpers
+    function $(id) { return document.getElementById(id); }
+    function val(id) { const el = $(id); return el ? el.value : ""; }
     function showLoading(show) { document.getElementById('loading-overlay').style.display = show ? 'flex' : 'none'; }
     function setLoadingLog(m) {}
 
