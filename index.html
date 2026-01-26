@@ -1,493 +1,1161 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-br">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
-  <title>CTL48 Music</title>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>ZAP48 Admin (Stages Edition)</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
-    :root{
-      /* Cores refinadas */
-      --primary: #fa2d48;
-      --primary-soft: rgba(250, 45, 72, 0.12);
-      --dark: #1c1c1e;
-      --gray: #8e8e93;
-      --light-gray: #f2f2f7;
-      --bg: #ffffff;
-      --white: #ffffff;
-      
-      /* Efeitos */
-      --shadow-color: 0 12px 30px rgba(250, 45, 72, 0.25);
-      --glass: saturate(180%) blur(20px);
-      --ease-ios: cubic-bezier(0.32, 0.72, 0, 1);
+    :root {
+      --primary: #8ACE00; /* Verde ZAP48 */
+      --secondary: #000000;
+      --bg: #f4f6f8;
+      --mc-bg: #f0f0f0;
+      --music-color: #e91e63;
     }
 
-    /* Reset e Base */
-    *{ box-sizing:border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-    
-    body{
-      margin:0;
-      min-height:100vh;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Manrope", Helvetica, Arial, sans-serif;
+    body {
       background: var(--bg);
-      color: var(--dark);
-      padding-bottom: 120px;
-      overflow-x:hidden;
+      margin: 0;
+      padding-bottom: 100px;
+      font-family: 'Roboto', sans-serif;
+      color: #333;
     }
 
-    /* Top bar (Glass) */
-    .topbar{
-      position: sticky; top:0; z-index:100;
-      padding: 12px 20px;
-      background: rgba(255,255,255,0.85);
-      backdrop-filter: var(--glass);
-      -webkit-backdrop-filter: var(--glass);
-      border-bottom: 1px solid rgba(0,0,0,0.05);
-    }
-    .brand{ display:flex; align-items:center; justify-content:space-between; max-width: 1100px; margin:0 auto; }
-    .logo{ font-weight: 800; font-size: 1.3rem; letter-spacing: -0.5px; color: var(--primary); }
-    .pill{
-      display:inline-flex; align-items:center; gap:6px; padding: 6px 14px;
-      border-radius: 20px; background: var(--light-gray);
-      font-weight:700; font-size:.75rem; color: var(--primary);
-      text-transform: uppercase; letter-spacing: 0.5px;
-    }
-
-    .wrap{ padding: 20px; max-width: 1100px; margin:0 auto; }
-
-    /* Hero */
-    .hero{ margin-top: 10px; display: flex; align-items: flex-end; position: relative; padding: 0; margin-bottom: 30px; }
-    .heroGrid{ display:flex; width: 100%; gap: 16px; align-items:center; }
-    .cover{
-      width: 110px; height: 110px; border-radius: 12px;
-      background: #eee; box-shadow: var(--shadow-color);
-      flex-shrink: 0; overflow:hidden;
-    }
-    .cover img{ width:100%; height:100%; object-fit: cover; }
-    .hInfo { flex: 1; }
-    .hero-label { font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--gray); margin-bottom: 4px; letter-spacing: 0.5px; }
-    .hTitle{ font-weight: 800; font-size: 1.5rem; line-height:1.1; margin:0 0 4px; color: var(--dark); letter-spacing: -0.5px; }
-    .hSub{ margin:0; color: var(--primary); font-weight:600; font-size: 0.95rem; }
-    .status{ position: absolute; top: -10px; right: 0; font-size: 0.7rem; font-weight: 700; color: #ccc; }
-    .err{ margin-top: 10px; background: #ffe5e5; color: #d32f2f; padding: 10px; border-radius: 8px; font-size: 0.8rem; display: none; }
-
-    /* Grid */
-    .sectionHeader{ margin-bottom: 16px; }
-    .sectionTitle{ font-weight: 800; font-size: 1.4rem; letter-spacing: -0.5px; color: var(--dark); margin: 0 0 12px 0; }
-    .search{
-      width: 100%; padding: 12px 16px; border-radius: 12px;
-      background: var(--light-gray); border: none; color: var(--dark);
-      font-size: 1rem; font-weight: 500; transition: background 0.2s;
-    }
-    .search:focus { background: #eaeaef; }
-
-    .grid{ display:grid; grid-template-columns: repeat(2, 1fr); gap: 20px 16px; }
-    @media (min-width: 600px){ .grid{ grid-template-columns: repeat(3, 1fr); } }
-    @media (min-width: 900px){ .grid{ grid-template-columns: repeat(5, 1fr); } }
-
-    .card{ cursor:pointer; user-select:none; transition: transform 0.2s var(--ease-ios), opacity 0.2s; }
-    .card:active{ transform: scale(0.96); opacity: 0.8; }
-    .cardCover{
-      width:100%; aspect-ratio: 1/1; border-radius: 12px; overflow: hidden;
-      margin-bottom: 10px; background: #f0f0f0; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-      position: relative;
-    }
-    .cardCover::after { content:''; position:absolute; inset:0; border-radius: 12px; border: 1px solid rgba(0,0,0,0.04); }
-    .cardCover img{ width:100%; height:100%; object-fit: cover; display:block; }
-    .cardTitle{
-      margin:0; font-weight: 600; font-size: 0.9rem; line-height: 1.2;
-      color: var(--dark); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-    }
-    .cardType{ margin-top: 4px; font-size: 0.75rem; color: var(--gray); }
-
-    /* Modal Player */
-    .player-modal{
-      position: fixed; inset: 0; z-index: 5000;
-      background: rgba(0,0,0,0.4); display: none;
-      align-items: flex-end; justify-content: center;
-      opacity: 0; transition: opacity 0.3s ease;
-    }
-    .player-modal.active{ display:flex; opacity: 1; }
-    .player-sheet{
-      width: 100%; height: 92vh; max-width: 500px;
-      background: rgba(255,255,255,0.92);
-      backdrop-filter: saturate(180%) blur(40px); -webkit-backdrop-filter: saturate(180%) blur(40px);
-      border-radius: 30px 30px 0 0; padding: 0 30px 40px;
-      box-shadow: 0 -10px 40px rgba(0,0,0,0.2);
-      transform: translateY(100%); transition: transform 0.4s var(--ease-ios);
-      display: flex; flex-direction: column; position: relative;
-    }
-    .player-modal.active .player-sheet { transform: translateY(0); }
-
-    .player-grab{ width: 40px; height: 5px; border-radius: 10px; background: rgba(0,0,0,0.15); margin: 12px auto 30px; flex-shrink: 0; }
-    .player-cover{
-      width: 100%; aspect-ratio: 1/1; border-radius: 20px; overflow: hidden;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.25); margin-bottom: 40px;
-      position: relative; transform: scale(0.9); transition: transform 0.5s var(--ease-ios);
-    }
-    .player-modal.active .player-cover { transform: scale(1); }
-    .player-cover img{ width: 100%; height: 100%; object-fit: cover; }
-
-    .player-info-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
-    .player-texts { flex: 1; padding-right: 10px; }
-    .player-title{ font-weight: 800; font-size: 1.4rem; color: var(--dark); line-height: 1.1; margin-bottom: 6px; }
-    .player-sub{ font-size: 1rem; font-weight: 500; color: var(--primary); }
-
-    /* Progress */
-    .player-progress-container { width: 100%; height: 20px; display: flex; align-items: center; cursor: pointer; margin-bottom: 30px; }
-    .player-progress{ width: 100%; height: 4px; background: rgba(0,0,0,0.06); border-radius: 4px; position: relative; overflow: visible; }
-    .player-progress-fill{ height: 100%; width: 0%; background: var(--dark); border-radius: 4px; position: relative; }
-    .player-progress-fill::after {
-      content:''; position: absolute; right: -6px; top: 50%; transform: translateY(-50%);
-      width: 12px; height: 12px; background: var(--dark); border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    .header {
+      background: #000;
+      padding: 15px;
+      text-align: center;
+      color: var(--primary);
+      font-weight: 900;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, .1);
+      font-size: 1.2rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
 
-    /* Controls */
-    .player-controls{ display: flex; align-items: center; justify-content: space-around; }
-    .player-btn{
-      background: none; border: none; cursor: pointer; color: var(--dark);
-      font-size: 32px; opacity: 0.8; transition: transform 0.1s;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .player-btn:active{ transform: scale(0.8); opacity: 1; }
-    .player-btn.main{ font-size: 48px; width: 80px; height: 80px; opacity: 1; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.15)); }
-    .player-close{
-      text-align: center; margin-top: auto; padding: 15px; font-weight: 700;
-      font-size: 0.8rem; color: var(--gray); letter-spacing: 1px; text-transform: uppercase;
+    .menu-toggle {
+        display: none; /* Hidden on desktop */
+        background: none;
+        border: none;
+        color: var(--primary);
+        font-size: 1.5rem;
+        cursor: pointer;
     }
 
-    /* Mini Player */
-    #miniPlayer{
-      position:fixed; left: 10px; right: 10px; bottom: 20px; z-index: 200; height: 64px;
-      display:none; align-items:center; padding: 6px; border-radius: 16px;
-      background: rgba(255,255,255,0.85); backdrop-filter: var(--glass); -webkit-backdrop-filter: var(--glass);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.2);
-      transition: transform 0.3s var(--ease-ios);
+    /* Mobile Menu Overlay */
+    .mobile-menu-overlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1001; display: none;
     }
-    #miniPlayer:active { transform: scale(0.98); }
-    #mpCover{ width: 52px; height: 52px; border-radius: 10px; object-fit:cover; background: #eee; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-    .mp-info { flex: 1; padding: 0 12px; min-width: 0; display: flex; flex-direction: column; justify-content: center; }
-    #mpTitle{ font-weight: 700; font-size: 0.95rem; color: var(--dark); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    #mpSub{ font-size: 0.75rem; color: var(--gray); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    #mpBtn{ width: 44px; height: 44px; border: none; background: transparent; color: var(--dark); font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
-    #ytwrap{ position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;overflow:hidden; }
+    .mobile-menu {
+        position: fixed; top: 0; left: -280px; width: 280px; height: 100%; background: #fff; z-index: 1002; transition: left 0.3s ease; padding-top: 60px; box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+    }
+
+    .mobile-menu.open { left: 0; }
+
+    .mobile-menu-item {
+        display: block; padding: 15px 20px; color: #333; text-decoration: none; font-weight: 700; border-bottom: 1px solid #eee; cursor: pointer; display: flex; align-items: center; gap: 10px;
+    }
+    
+    .mobile-menu-item.active { background-color: #f0f0f0; color: #000; border-left: 5px solid var(--primary); }
+    .mobile-menu-item i { font-size: 1.2rem; width: 24px; text-align: center; }
+
+    .mobile-menu-close {
+        position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #000;
+    }
+
+    /* Media Query for Mobile */
+    @media (max-width: 768px) {
+        .bottom-nav { display: none; }
+        .menu-toggle { display: block; }
+        body { padding-bottom: 0; }
+    }
+
+    .section {
+      display: none;
+      padding: 15px;
+      animation: fadeIn .25s;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card {
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, .05);
+      border: 1px solid #eee;
+    }
+
+    h2 { margin-top: 0; color: #000; font-weight: 900; }
+
+    label {
+      display: block;
+      font-size: .75rem;
+      font-weight: 900;
+      color: #666;
+      margin-top: 14px;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      background: #fff;
+      font-size: 1rem;
+      transition: .2s;
+      color: #333;
+      font-family: inherit;
+      font-weight: 500;
+      box-sizing: border-box;
+    }
+    
+    input:focus, select:focus, textarea:focus {
+        border-color: var(--primary);
+        outline: none;
+    }
+
+    textarea { resize: vertical; }
+
+    .btn-main {
+      width: 100%;
+      padding: 15px;
+      background: var(--primary);
+      color: #000;
+      border: 2px solid #000;
+      border-radius: 8px;
+      font-weight: 900;
+      margin-top: 16px;
+      font-size: 1rem;
+      cursor: pointer;
+      text-transform: uppercase;
+      box-shadow: 4px 4px 0 #000;
+      transition: transform 0.1s;
+    }
+
+    .btn-main:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 #000; }
+
+    .btn-ghost {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      font-weight: 900;
+      border: 2px solid #ddd;
+      background: #fff;
+      color: #555;
+      cursor: pointer;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+    }
+
+    .input-group { display: flex; gap: 8px; align-items: center; margin-top: 5px; }
+
+    .btn-upload {
+      background: #333;
+      color: #fff;
+      border: none;
+      padding: 12px 15px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .upload-status { font-size: .78rem; color: var(--primary); margin-top: 6px; font-weight: 900; min-height: 15px; }
+
+    /* Bottom Nav for Desktop/Large Screens */
+    .bottom-nav {
+      position: fixed; bottom: 0; width: 100%; height: 70px; background: #000; display: flex; border-top: 4px solid var(--primary); z-index: 1000;
+    }
+
+    .nav-item {
+      flex: 1; border: none; background: none; color: #666; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: .65rem; font-weight: 900; cursor: pointer; text-transform: uppercase;
+    }
+
+    .nav-item.active { color: var(--primary); }
+    .nav-item i { font-size: 1.4rem; margin-bottom: 4px; }
+
+    /* LOADING */
+    #loading-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, .95); z-index: 5000; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+    }
+    .spinner { border: 5px solid #f3f3f3; border-top: 5px solid var(--primary); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 20px; }
+    @keyframes spin { 0% { transform: rotate(0) } 100% { transform: rotate(360deg) } }
+
+    /* MODAL */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: none; flex-direction: column; overflow-y: auto;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal-box {
+        background: #fff; width: 95%; max-width: 600px; margin: auto; border-radius: 12px; padding: 20px; box-sizing: border-box; position: relative;
+    }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+    .modal-header h3 { margin: 0; text-transform: uppercase; }
+    .close-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; font-weight: bold; }
+
+    /* --- STAGE & SETLIST CSS --- */
+    .setlist-preview {
+        background: #fafafa; border: 2px dashed #ddd; padding: 15px; border-radius: 8px; margin-top: 10px; max-height: 300px; overflow-y: auto; font-size: 0.9rem;
+    }
+    .setlist-m { color: var(--music-color); font-weight: 700; margin-bottom: 4px; display: block; }
+    .setlist-mc { background: var(--mc-bg); color: #333; font-weight: 900; font-style: italic; padding: 4px 8px; border-radius: 4px; display: inline-block; margin: 8px 0; font-size: 0.8rem; }
+    .setlist-header { font-size: 1.1rem; font-weight: 900; text-transform: uppercase; border-bottom: 3px solid var(--primary); display: inline-block; margin-top: 15px; margin-bottom: 5px; }
+    
+    /* CAST MANAGEMENT */
+    .cast-item { background: #fff; border: 1px solid #ddd; padding: 10px; margin-bottom: 8px; border-radius: 8px; }
+    .cast-header { display: flex; justify-content: space-between; align-items: center; font-weight: 900; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 5px; }
+    .cast-members { display: flex; flex-wrap: wrap; gap: 5px; }
+    .cast-member-pill { background: #eee; font-size: 0.7rem; padding: 3px 8px; border-radius: 4px; display: flex; align-items: center; gap: 5px; }
+    
+    /* SELECTION GRID */
+    .selection-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 8px; max-height: 50vh; overflow-y: auto; padding: 5px; }
+    .select-item { text-align: center; cursor: pointer; padding: 5px; border-radius: 8px; border: 1px solid transparent; }
+    .select-item:hover { background: #f0f0f0; }
+    .select-item.selected { background: #e8f5e9; border-color: var(--primary); }
+    .select-item img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #ddd; }
+    .select-item div { font-size: 0.7rem; font-weight: 700; margin-top: 4px; line-height: 1.1; }
+
+    /* BUILDER STYLES */
+    .builder-modal-header { padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: #fff; z-index: 10; }
+    .builder-stage-area { padding: 20px; }
+    .rows-panel { margin-top: 10px; padding: 12px; border: 1px solid #eee; border-radius: 12px; background: #fafafa; }
+    .rows-panel .rowline { display: flex; gap: 10px; align-items: center; margin-top: 10px; }
+    .row-tag { min-width: 92px; font-size: .75rem; font-weight: 900; color: #444; text-transform: uppercase; }
+    .slots-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; padding: 18px; border: 2px dashed #ddd; margin-top: 15px; border-radius: 12px; background: #fafafa; }
+    .rows-wrap { display: flex; flex-direction: column; gap: 14px; width: 100%; }
+    .slots-row { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+    .slot { width: 74px; text-align: center; position: relative; cursor: pointer; transition: transform .2s; }
+    .slot:active { transform: scale(.92); }
+    .slot-circle { width: 64px; height: 64px; border-radius: 50%; background: #fff; border: 2px solid #ddd; display: flex; justify-content: center; align-items: center; margin: 0 auto; overflow: hidden; position: relative; }
+    .slot.is-center .slot-circle { border-color: #e91e63; z-index: 2; box-shadow: 0 0 0 4px rgba(233, 30, 99, .4); transform: scale(1.05); }
+    .slot-badge { position: absolute; bottom: 18px; right: 2px; background: #333; color: #fff; width: 20px; height: 20px; font-size: .65rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 5; border: 2px solid #fff; font-weight: 900; }
+    .slot.is-center .slot-badge { background: #e91e63; }
+    .slot img { width: 100%; height: 100%; object-fit: cover; }
+    .slot-name { font-size: .68rem; margin-top: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 900; }
+
+    /* TRACK ITEM */
+    .track-item { background: #fff0f5; padding: 10px 12px; border-radius: 10px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #ffc1e3; gap: 10px; }
+    .track-info { flex: 1; }
+    .track-actions { display: flex; gap: 4px; align-items: center; }
+    .btn-icon { border: none; background: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #555; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05); }
+    .btn-icon.delete { color: #f44336; background: #ffebee; }
+    .badge { font-size: .72rem; font-weight: 900; border-radius: 999px; padding: 4px 10px; background: #333; color: #fff; text-transform: uppercase; display: inline-block; margin-left: 6px; }
+
   </style>
 </head>
 
 <body>
-  <header class="topbar">
-    <div class="brand">
-      <div class="logo">CTL48</div>
-      <div class="pill">Music</div>
-    </div>
-  </header>
 
-  <main class="wrap">
-    <section class="hero" id="hero">
-      <div class="heroGrid">
-        <div class="cover"><img id="heroCover" alt="" /></div>
-        <div class="hInfo">
-          <div class="hero-label">Último Lançamento</div>
-          <h1 class="hTitle" id="heroTitle">Carregando…</h1>
-          <p class="hSub" id="heroSub">Discografia</p>
-        </div>
-      </div>
-      <div class="status" id="status">Conectando…</div>
-      <div class="err" id="err"></div>
-    </section>
+  <div class="header">
+      <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+      ZAP48 Admin
+      <div style="width: 24px;"></div> </div>
 
-    <section class="section">
-      <div class="sectionHeader">
-        <h2 class="sectionTitle">Singles</h2>
-        <input id="q" class="search" placeholder="Buscar nas faixas" />
-      </div>
+  <div class="mobile-menu-overlay" onclick="toggleMenu()"></div>
+  <div class="mobile-menu" id="mobileMenu">
+      <button class="mobile-menu-close" onclick="toggleMenu()">✕</button>
+      <div class="mobile-menu-item" onclick="nav('news', this)"><i class="fas fa-newspaper"></i> Notícias</div>
+      <div class="mobile-menu-item" onclick="nav('disco', this)"><i class="fas fa-plus-circle"></i> Add Música</div>
+      <div class="mobile-menu-item" onclick="nav('managedisco', this)"><i class="fas fa-edit"></i> Editar Música</div>
+      <div class="mobile-menu-item" onclick="nav('stages', this)"><i class="fas fa-theater-masks"></i> Stage</div>
+      <div class="mobile-menu-item" onclick="nav('members', this)"><i class="fas fa-user-plus"></i> Novo Membro</div>
+      <div class="mobile-menu-item" onclick="nav('manage', this)"><i class="fas fa-user-edit"></i> Editar Membro</div>
+  </div>
 
-      <div class="grid" id="grid"></div>
-    </section>
-  </main>
+  <div id="loading-overlay">
+    <div class="spinner"></div>
+    <div id="loading-text">Processando...</div>
+  </div>
 
-  <div id="idolPlayer" class="player-modal">
-    <div class="player-sheet">
-      <div class="player-grab"></div>
-      <div class="player-cover"><img id="ip-cover" src="" alt=""></div>
-      <div class="player-info-row">
-        <div class="player-texts">
-          <div class="player-title" id="ip-title">—</div>
-          <div class="player-sub" id="ip-sub">CTL48</div>
-        </div>
-      </div>
-      <div class="player-progress-container">
-        <div class="player-progress"><div id="ip-progress" class="player-progress-fill"></div></div>
-      </div>
-      <div class="player-controls">
-        <button class="player-btn" onclick="ytPrev()">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M11 18V6l-8.5 6 8.5 6zm.5-6l8.5 6V6l-8.5 6z"/></svg>
-        </button>
-        <button id="ip-play" class="player-btn main" onclick="togglePlay()">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-        </button>
-        <button class="player-btn" onclick="ytNext()">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z"/></svg>
-        </button>
-      </div>
-      <div class="player-close" onclick="closeIdolPlayer()">Fechar Player</div>
+  <div id="tab-news" class="section">
+    <div class="card">
+      <h2>📢 Nova Notícia</h2>
+      <p>Publique atualizações, eventos ou avisos importantes.</p>
+      <form onsubmit="saveNews(event)">
+        <label>Título</label><input id="n-title" required />
+        <label>Categoria</label>
+        <select id="n-cat">
+          <option>Release</option>
+          <option>Event</option>
+          <option>Notice</option>
+          <option>Theater</option>
+        </select>
+        <label>Data</label><input type="date" id="n-date" required />
+        <label>Conteúdo</label><textarea id="n-text" rows="5"></textarea>
+        <button class="btn-main">Publicar</button>
+      </form>
     </div>
   </div>
 
-  <div id="miniPlayer">
-    <img id="mpCover" src="" alt="">
-    <div class="mp-info">
-      <div id="mpTitle">—</div>
-      <div id="mpSub">CTL48</div>
+  <div id="tab-disco" class="section">
+    <div class="card">
+      <h2>💿 Adicionar Música</h2>
+      <p>Cadastre novos singles, álbuns ou stages.</p>
+      <form onsubmit="saveDisco(event)">
+        <label>Título</label><input id="d-title" required placeholder="Ex: 10th Single" />
+        <div style="display:flex; gap:10px;">
+          <div style="flex:1"><label>Tipo</label><select id="d-type">
+              <option>Single</option>
+              <option>Album</option>
+              <option>Stage</option>
+            </select></div>
+          <div style="flex:1"><label>Data</label><input type="date" id="d-date" required /></div>
+        </div>
+        <label>Center (Auto)</label><input id="d-center" readonly style="background:#eee;" />
+
+        <label>Capa (URL ou Upload)</label>
+        <div class="input-group">
+          <input id="d-cover" placeholder="https://..." required />
+          <button type="button" class="btn-upload" onclick="alert('Use o upload de imagem nas outras abas se precisar')"><i class="fas fa-image"></i></button>
+        </div>
+        <div id="d-upload-status" class="upload-status"></div>
+
+        <div style="margin-top:16px; border-top:1px solid #eee; padding-top:14px;">
+          <label>Músicas & Formações</label>
+          <div id="tracks-list">
+            <div style="text-align:center;color:#999;font-size:.85rem;">Vazio</div>
+          </div>
+          <button type="button" class="btn-main" style="background:#333; margin-top:10px;"
+            onclick="openBuilder(false)">+ Adicionar Faixa</button>
+        </div>
+        <button class="btn-main">Salvar Tudo</button>
+      </form>
     </div>
-    <button id="mpBtn" aria-label="Play/Pause">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-    </button>
   </div>
 
-  <div id="ytwrap"><div id="ytplayer"></div></div>
+  <div id="tab-managedisco" class="section">
+    <div class="card">
+      <h2>🗂️ Editar Música</h2>
+      <p>Gerencie e atualize informações da discografia existente.</p>
+      <select id="disco-selector" onchange="fillDiscoEditForm()">
+        <option value="">Carregando...</option>
+      </select>
+      <div id="disco-edit-form" style="display:none; margin-top:15px;">
+        <form onsubmit="updateDisco(event)">
+          <label>Título</label><input id="ed-title" readonly style="background:#eee; color:#777;" />
+          <div style="display:flex; gap:10px;">
+            <div style="flex:1"><label>Tipo</label><select id="ed-type">
+                <option>Single</option>
+                <option>Album</option>
+                <option>Stage</option>
+              </select></div>
+            <div style="flex:1"><label>Data</label><input type="date" id="ed-date" required /></div>
+          </div>
+          <label>Center (Auto)</label><input id="ed-center" />
+          <label>Capa</label><input id="ed-cover" required />
+
+          <div style="margin-top:20px; border-top:1px solid #eee; padding-top:15px;">
+            <label style="color:#2196f3;">Lista de Músicas (Editar)</label>
+            <div id="ed-tracks-list" style="margin-bottom:15px;"></div>
+            <button type="button" class="btn-ghost" style="font-size:.9rem;" onclick="openBuilder(true)">+ Adicionar Nova
+              Música</button>
+          </div>
+          <button class="btn-main" style="background:#2196f3;">Salvar Alterações</button>
+        </form>
+        <button class="btn-main" style="background:#f44336; margin-top:25px;" onclick="deleteDisco()">Deletar Disco
+          (Cascade)</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-stages" class="section active">
+    <div class="card">
+      <h2>🎭 Gerenciar Stages</h2>
+      <div style="display:flex; gap:10px; margin-bottom:15px;">
+         <button class="btn-ghost" onclick="resetStageForm()" style="flex:1;">+ Novo Stage</button>
+         <select id="stage-selector" onchange="fillStageForm()" style="flex:2;"><option>Carregando...</option></select>
+      </div>
+      
+      <div id="stage-form-container" style="display:none;">
+          <form onsubmit="saveStage(event)">
+            <input type="hidden" id="st-id">
+            
+            <label>Título do Stage</label>
+            <input id="st-title" required placeholder="Ex: ZAP48 1st Stage">
+            
+            <label>Subtítulo</label>
+            <input id="st-subtitle" placeholder="Ex: 'Party ga Hajimaru yo'">
+            
+            <div style="display:flex; gap:10px;">
+                <div style="flex:1"><label>Estreia</label><input type="date" id="st-date"></div>
+                <div style="flex:1"><label>Status</label>
+                    <select id="st-status">
+                        <option>Em Cartaz</option>
+                        <option>Finalizado</option>
+                        <option>Breve</option>
+                    </select>
+                </div>
+            </div>
+            
+            <label>Capa (URL)</label>
+            <div class="input-group">
+                <input id="st-cover" placeholder="https://...">
+            </div>
+
+            <label>Setlist (Texto Longo)</label>
+            <textarea id="st-setlist" rows="10" placeholder="Cole a setlist aqui (M01... MC1...)" oninput="updateSetlistPreview()"></textarea>
+            <div id="st-setlist-preview" class="setlist-preview">Pré-visualização...</div>
+
+            <hr style="margin: 20px 0; border: 0; border-top: 2px dashed #ddd;">
+
+            <h3>👥 Elencos (Casts)</h3>
+            <div id="st-casts-list"></div>
+            <button type="button" class="btn-ghost" onclick="openCastModal()">+ Adicionar Elenco (Team/Shonichi)</button>
+
+            <button class="btn-main">Salvar Stage</button>
+            <button type="button" class="btn-main" style="background:#f44336; border-color:#d32f2f; margin-top:10px;" onclick="deleteStage()">Excluir Stage</button>
+          </form>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-members" class="section">
+    <div class="card">
+      <h2>👤 Novo Membro</h2>
+      <form onsubmit="saveMember(event)">
+        <label>Nome</label><input id="m-name" required />
+        <div style="display:flex; gap:10px;">
+          <div style="flex:1">
+              <label>Time</label>
+              <select id="m-team" class="team-select"></select>
+          </div>
+          <div style="flex:1"><label>Geração</label><input type="number" id="m-gen" required placeholder="Ex: 1" /></div>
+        </div>
+        <label>Status</label>
+        <select id="m-status-select">
+          <option value="Ativa">Ativa</option>
+          <option value="Graduada">Graduada</option>
+          <option value="Demitida">Demitida</option>
+          <option value="Expulsa">Expulsa</option>
+        </select>
+
+        <label>Foto</label>
+        <div class="input-group">
+          <input id="m-photo" placeholder="https://..." required />
+          <input type="file" id="m-photo-file" style="display:none" accept="image/*" onchange="uploadImage(this, 'm-photo', 'm-upload-status')" />
+          <button type="button" class="btn-upload" onclick="document.getElementById('m-photo-file').click()"><i class="fas fa-upload"></i></button>
+        </div>
+        <div id="m-upload-status" class="upload-status"></div>
+
+        <label>Biografia</label><textarea id="m-bio" rows="4"></textarea>
+        <button class="btn-main">Cadastrar</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="tab-manage" class="section">
+    <div class="card">
+      <h2>✏️ Editar Membro</h2>
+      <input type="text" id="manage-search" placeholder="🔍 Buscar..." oninput="renderManageSelect(this.value)" style="width:100%; margin-bottom:10px;" />
+      <select id="manage-selector" onchange="fillEditForm()"><option value="">Selecione...</option></select>
+
+      <div id="edit-form" style="display:none; margin-top:15px;">
+        <img id="e-preview" src="" style="width:80px;height:80px;border-radius:50%; margin-bottom:10px; border:2px solid #000;" />
+        <form onsubmit="updateMember(event)">
+          <label>Nome</label><input id="e-name" required />
+          <div style="display:flex; gap:10px;">
+            <div style="flex:1"><label>Time</label><select id="e-team" class="team-select"></select></div>
+            <div style="flex:1"><label>Geração</label><input type="number" id="e-gen" required /></div>
+          </div>
+          <label>Status</label><select id="e-status-select">
+            <option value="Ativa">Ativa</option>
+            <option value="Graduada">Graduada</option>
+            <option value="Demitida">Demitida</option>
+            <option value="Expulsa">Expulsa</option>
+          </select>
+
+          <label>Foto</label>
+          <div class="input-group">
+            <input id="e-photo" required onchange="document.getElementById('e-preview').src=this.value" />
+            <input type="file" id="e-photo-file" style="display:none" accept="image/*" onchange="uploadImage(this, 'e-photo', 'e-upload-status')" />
+            <button type="button" class="btn-upload" onclick="document.getElementById('e-photo-file').click()"><i class="fas fa-upload"></i></button>
+          </div>
+          <div id="e-upload-status" class="upload-status"></div>
+
+          <label>Bio</label><textarea id="e-bio" rows="4"></textarea>
+          <button class="btn-main">Salvar Alterações</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div id="cast-modal" class="modal-overlay">
+      <div class="modal-box">
+          <div class="modal-header">
+              <h3>Editar Elenco</h3>
+              <button class="close-btn" onclick="closeCastModal()">×</button>
+          </div>
+          <label>Nome do Elenco (ex: Team Z)</label>
+          <input id="c-name" placeholder="Nome do time/elenco">
+          <label>Selecionar Membros</label>
+          <input type="text" id="cast-search" placeholder="Filtrar membros..." oninput="renderCastSelection(this.value)" style="margin-bottom:10px;">
+          <div id="cast-selection-grid" class="selection-grid"></div>
+          <button class="btn-main" onclick="saveCastToStage()">Confirmar Elenco</button>
+      </div>
+  </div>
+
+  <div id="builder-modal" class="modal-overlay">
+    <div class="builder-modal-header modal-header"><span style="font-weight:900;">Formação</span><button onclick="closeBuilder(true)">✕</button></div>
+    <div id="step-1" style="padding:20px; display:block;">
+      <label>Música</label><input id="b-song" placeholder="Nome da faixa" />
+      <label>Tipo</label>
+      <select id="b-kind" onchange="toggleKindRules()">
+        <option value="A-side">A-side</option>
+        <option value="B-side">B-side</option>
+        <option value="Undergirls">Undergirls</option>
+        <option value="Unit">Unit</option>
+        <option value="Solo">Solo</option>
+      </select>
+      <div id="unit-fields" style="display:none;"><label>Nome Unit</label><input id="b-unit-name" /></div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:8px;">
+        <div><label>Total</label><input type="number" id="b-total" value="16" min="1" oninput="syncRowsUI()" /></div>
+        <div><label>Centers</label><input type="number" id="b-centers" value="1" min="0" oninput="syncRowsUI()" /></div>
+      </div>
+      <div id="manual-rows" class="rows-panel">
+        <label>Fileiras</label>
+        <select id="b-rowcount" onchange="renderRowInputs()">
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3" selected>3</option>
+          <option value="4">4</option>
+        </select>
+        <div id="row-inputs"></div>
+        <div class="row-sum">Soma: <b id="rows-sum" style="color:#00b894;">16</b> / <b id="rows-total">16</b></div>
+      </div>
+      <button class="btn-main" onclick="startStage()">Montar</button>
+    </div>
+    <div id="step-2" class="builder-stage-area stage-area" style="display:none;">
+      <div id="slots" class="slots-container"></div>
+      <div style="display:flex; gap:10px; margin-top:16px;">
+        <button type="button" class="btn-ghost" onclick="backToFormationMenu()">Voltar</button>
+        <button type="button" class="btn-main" style="background:#00b894; margin-top:0;" onclick="finishTrack()">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="member-select-modal" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header"><h3>Escolha</h3><button class="close-btn" onclick="closeMemberModal()">✕</button></div>
+      <input id="member-search" placeholder="Buscar..." oninput="renderMemberSelectionList(this.value)" style="width:100%; margin-bottom:10px;" />
+      <div id="selection-list" class="selection-grid"></div>
+      <button onclick="clearSlot()" class="btn-main" style="background:#f44336; margin-top:10px;">Remover (Vazio)</button>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <button class="nav-item active" onclick="nav('stages', this)"><i class="fas fa-theater-masks"></i>Stage</button>
+    <button class="nav-item" onclick="nav('members', this)"><i class="fas fa-user-plus"></i>Add</button>
+    <button class="nav-item" onclick="nav('manage', this)"><i class="fas fa-users-cog"></i>Edit</button>
+  </div>
 
   <script>
-    // =======================
-    // CONFIG
-    // =======================
-    const SUPABASE_URL = "https://iooyygtaosshxygnhlco.supabase.co";
+    // === ⚙️ CONFIGURAÇÃO DE TIMES (Fácil Alteração) ===
+    const TEAM_CONFIG = {
+        "Team Z": "Team Z",
+        "Team AII": "Team AII",
+        "Team P": "Team P",
+        "Team Kenkyuusei": "Team Kenkyuusei",
+        "Graduada": "Graduada"
+    };
+
+    // === SUPABASE ===
+    const SUPABASE_URL = 'https://iooyygtaosshxygnhlco.supabase.co';
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlvb3l5Z3Rhb3NzaHh5Z25obGNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkwMDEyNTUsImV4cCI6MjA4NDU3NzI1NX0.gfcVtNgn3g1gnFVrtaIqzkWxajYiV_KbtycYsE9OZ0Y";
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const IMGBB_KEY = "81f7ca81cf22d739de576bd1dac7dcc2";
+
+    // Tabelas
+    const T_MEMBERS = "Membros";
+    const T_STAGES = "Stages";
+    const T_STAGECASTS = "Stagecasts";
+    const T_NEWS = "Noticias";
     const T_DISCO = "Discografia";
 
-    // =======================
-    // BIBLIOTECA DE LINKS (Nome da Música -> YouTube URL)
-    // =======================
-    const SONG_LIBRARY = {
-      "Aitakatta": "https://www.youtube.com/watch?v=XEqLqr8o_Is",
-      "Dakedo": "https://youtu.be/sG9rpL17AbQ",
-      "Seifuku ga Jama wo Suru": "https://www.youtube.com/watch?v=VcE8vcpbzUY",
-      "Virgin Love": "https://youtu.be/-ofmqOb04Bc",
-      "Keibetsu Shiteita Aijo": "https://www.youtube.com/watch?v=MLkds5hoXjE",
-      "Namida no Uri no Shoujo": "https://youtu.be/woZnd-_rHOQ",
-      "BINGO!": "https://www.youtube.com/watch?v=CvKo8IWh37k",
-      "Only Today": "https://youtu.be/AyxqP8tMobQ",
-      // Novos do 5th Single
-      "Yuuhi wo Miteiru ka?": "https://www.youtube.com/watch?v=9aZFw3zINDA",
-      "Viva! Hurricane": "https://youtu.be/j_f-YTWkK34",
-      "Boku no Taiyou": "https://youtu.be/D2RJ25agCYM"
-    };
+    // Estado
+    let allMembers = [];
+    let allStages = [];
+    let allDiscos = [];
+    let currentStageCasts = [];
+    let editingCastIndex = -1;
+    let tracksBuffer = [];
+    let builderIsEditMode = false;
+    let activeSlot = null;
+    let currentEditingDiscoId = null;
 
-    // =======================
-    // TRACKLIST PARSER (Corrigido com sanitização de aspas)
-    // =======================
-    function extractTracksFromDB(htmlString) {
-      if (!htmlString) return [];
-      
-      try {
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = htmlString;
-        
-        const dataDiv = tempDiv.querySelector('#ctl48-formation-data');
-        if (!dataDiv) return [];
+    // === INICIALIZAÇÃO ===
+    async function init() {
+        populateTeamSelects();
+        await loadMembers();
+        await loadStages();
+        await loadDiscos();
+    }
 
-        const jsonData = JSON.parse(dataDiv.textContent);
-        
-        // Mapeia para o formato do player COM LIMPEZA DE ASPAS
-        return jsonData.map(item => {
-          const songNameRaw = item.name || "";
-          
-          // Remove aspas duplas ou inteligentes para garantir match no SONG_LIBRARY
-          const songName = songNameRaw.replace(/["”“]/g, "").trim();
-          
-          // Tenta buscar pelo nome limpo OU pelo nome cru
-          const url = SONG_LIBRARY[songName] || SONG_LIBRARY[songNameRaw] || "";
-          
-          return {
-            title: songNameRaw, // Mantém título original para exibição
-            ytUrl: url
-          };
+    function populateTeamSelects() {
+        const selects = document.querySelectorAll('.team-select');
+        selects.forEach(sel => {
+            sel.innerHTML = '';
+            for (const [key, label] of Object.entries(TEAM_CONFIG)) {
+                const opt = document.createElement('option');
+                opt.value = label;
+                opt.text = label;
+                sel.appendChild(opt);
+            }
         });
-
-      } catch (e) {
-        console.error("Erro ao ler tracklist do banco:", e);
-        return [];
-      }
     }
 
-    // =======================
-    // Helpers & SVG
-    // =======================
-    const $ = (id) => document.getElementById(id);
-    const escapeHtml = (s) => String(s??"").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
-    
-    function resolveImage(field) {
-      if (!field) return "";
-      if (Array.isArray(field)) field = field[0];
-      if (typeof field === "object") field = field.url || field.publicUrl || field.path || "";
-      let s = String(field).trim().replace(/^"+|"+$/g, "");
-      const idx = s.indexOf("http");
-      if (idx > 0) s = s.slice(idx);
-      if (s.startsWith("http")) return s;
-      return "";
+    // === NAVEGAÇÃO ===
+    function nav(id, el) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        document.getElementById('tab-' + id).classList.add('active');
+        if(el) el.classList.add('active');
+        
+        // Mobile Menu Logic
+        const menu = document.getElementById('mobileMenu');
+        if (menu.classList.contains('open')) toggleMenu();
     }
-    const getIdSafe = (r) => Number(r?.id ?? r?.Id ?? 0);
-    const ytIdFromUrl = (u) => (String(u||"").match(/(?:youtu\.be\/|v=|embed\/)([a-zA-Z0-9_-]{6,})/) || [])[1] || "";
 
-    const ICON_PLAY = `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>`;
-    const ICON_PAUSE = `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`;
-    const ICON_PLAY_LG = `<svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>`;
-    const ICON_PAUSE_LG = `<svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`;
+    function toggleMenu() {
+        const menu = document.getElementById('mobileMenu');
+        const overlay = document.querySelector('.mobile-menu-overlay');
+        if (menu.classList.contains('open')) {
+            menu.classList.remove('open');
+            overlay.style.display = 'none';
+        } else {
+            menu.classList.add('open');
+            overlay.style.display = 'block';
+        }
+    }
 
-    // =======================
-    // Supabase & YouTube
-    // =======================
-    if (!window.supabase) throw new Error("Supabase CDN failed");
-    const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    // === CARREGAMENTO DE DADOS ===
+    async function loadMembers() {
+        const { data, error } = await _supabase.from(T_MEMBERS).select('*').order('Nome');
+        if (error) console.error(error);
+        allMembers = data || [];
+        renderManageSelect();
+    }
 
-    let ytPlayer = null, ytReady = false;
-    async function initYT(){
-      if(!window.YT){
-        await new Promise(r => {
-          const t = document.createElement("script"); t.src = "https://www.youtube.com/iframe_api";
-          document.head.appendChild(t); window.onYouTubeIframeAPIReady = r;
+    async function loadStages() {
+        const { data, error } = await _supabase.from(T_STAGES).select('*').order('id', { ascending: false });
+        if (error) console.error(error);
+        allStages = data || [];
+        const sel = document.getElementById('stage-selector');
+        sel.innerHTML = '<option value="">Selecione para editar...</option>';
+        allStages.forEach(s => {
+            const opt = document.createElement('option');
+            opt.value = s.id;
+            opt.text = s.Titulo;
+            sel.appendChild(opt);
         });
-      }
-      ytPlayer = new YT.Player("ytplayer", {
-        height: "0", width: "0", videoId: "",
-        playerVars: { autoplay:0, controls:0, modestbranding:1 },
-        events: { onReady: ()=>{ ytReady=true; updateUI(); }, onStateChange: updateUI }
-      });
     }
-
-    function playById(id){ if(ytReady && ytPlayer && id){ ytPlayer.loadVideoById(id); ytPlayer.playVideo(); } }
-    function togglePlay(){
-      if(ytReady && ytPlayer){
-        ytPlayer.getPlayerState() === YT.PlayerState.PLAYING ? ytPlayer.pauseVideo() : ytPlayer.playVideo();
-      }
-    }
-    const isPlaying = () => ytReady && ytPlayer && ytPlayer.getPlayerState() === YT.PlayerState.PLAYING;
-
-    // =======================
-    // Player Logic
-    // =======================
-    const mp = { box: $("miniPlayer"), cover: $("mpCover"), title: $("mpTitle"), sub: $("mpSub"), btn: $("mpBtn") };
-    const idol = {
-      modal: $("idolPlayer"), cover: $("ip-cover"), title: $("ip-title"), sub: $("ip-sub"),
-      progress: $("ip-progress"), playBtn: $("ip-play"),
-      list: [], idx: 0, sTitle: "", sCover: ""
-    };
-
-    function initPlayers(){
-      mp.btn.onclick = (e) => { e.stopPropagation(); togglePlay(); };
-      mp.box.onclick = () => idol.modal.classList.add("active");
-      idol.modal.onclick = (e) => { if(e.target===idol.modal) closeIdolPlayer(); };
-      setInterval(()=>{
-        if(!ytPlayer || !ytReady) return;
-        const d = ytPlayer.getDuration(), c = ytPlayer.getCurrentTime();
-        if(d>0) idol.progress.style.width = Math.min(100, (c/d)*100) + "%";
-        updateUI();
-      }, 250);
-    }
-
-    function updateUI(){
-      const p = isPlaying();
-      mp.btn.innerHTML = p ? ICON_PAUSE : ICON_PLAY;
-      idol.playBtn.innerHTML = p ? ICON_PAUSE_LG : ICON_PLAY_LG;
-    }
-
-    function openIdolPlayer(tracks, idx, sTitle, sCover){
-      idol.list = tracks; idol.idx = idx; idol.sTitle = sTitle; idol.sCover = sCover;
-      idol.modal.classList.add("active");
-      playTrack();
-    }
-    function closeIdolPlayer(){ idol.modal.classList.remove("active"); }
-
-    function playTrack(){
-      const t = idol.list[idol.idx];
-      if(!t) return;
-      
-      const yid = ytIdFromUrl(t.ytUrl);
-      idol.cover.src = mp.cover.src = idol.sCover || "https://placehold.co/300x300?text=?";
-      idol.title.textContent = mp.title.textContent = t.title || "—";
-      idol.sub.textContent = mp.sub.textContent = "CTL48";
-      
-      mp.box.style.display = "flex";
-      playById(yid);
-    }
-
-    function ytNext(){ if(idol.idx < idol.list.length-1){ idol.idx++; playTrack(); } }
-    function ytPrev(){ if(idol.idx > 0){ idol.idx--; playTrack(); } }
-
-    // =======================
-    // App Logic
-    // =======================
-    let discos = [];
     
-    $("q").oninput = () => {
-      const v = $("q").value.toLowerCase();
-      renderGrid(discos.filter(d => (d.Titulo||"").toLowerCase().includes(v)));
-    };
-
-    function renderGrid(list){
-      const g = $("grid"); g.innerHTML = "";
-      if(!list.length) return g.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:#999;font-weight:700;padding:20px">Sem resultados.</div>`;
-      
-      list.forEach(d => {
-        const c = document.createElement("div"); c.className = "card";
-        const img = resolveImage(d.Capa) || "https://placehold.co/400?text=?";
-        c.innerHTML = `<div class="cardCover"><img src="${img}"></div><div class="cardInfo"><p class="cardTitle">${escapeHtml(d.Titulo)}</p><div class="cardType">${escapeHtml(d.Tipo||"Single")}</div></div>`;
-        c.onclick = () => openSingle(d);
-        g.appendChild(c);
-      });
+    async function loadDiscos() {
+        const { data, error } = await _supabase.from(T_DISCO).select('*').order('Data', { ascending: false });
+        if (error) console.error(error);
+        allDiscos = data || [];
+        const sel = document.getElementById('disco-selector');
+        sel.innerHTML = '<option value="">Selecione...</option>';
+        allDiscos.forEach(d => {
+            const opt = document.createElement('option');
+            opt.value = d.id;
+            opt.text = d.Titulo;
+            sel.appendChild(opt);
+        });
     }
 
-    function openSingle(d){
-      // [FIX 1] Usa d.Tracklist (maiúsculo) ou fallback
-      let tracks = extractTracksFromDB(d.Tracklist || d.tracklist);
+    // === LÓGICA DE STAGE ===
+    function resetStageForm() {
+        document.getElementById('stage-form-container').style.display = 'block';
+        document.getElementById('st-id').value = '';
+        document.getElementById('st-title').value = '';
+        document.getElementById('st-subtitle').value = '';
+        document.getElementById('st-date').value = '';
+        document.getElementById('st-cover').value = '';
+        document.getElementById('st-setlist').value = '';
+        currentStageCasts = [];
+        updateSetlistPreview();
+        renderStageCasts();
+    }
 
-      // FALLBACK MANUAL (Baseado no Título) se a extração falhar
-      if (tracks.length === 0) {
-        if(d.Titulo.includes("Aitakatta")) tracks = [{title:"Aitakatta", ytUrl:SONG_LIBRARY["Aitakatta"]},{title:"Dakedo", ytUrl:SONG_LIBRARY["Dakedo"]}];
-        else if(d.Titulo.includes("Seifuku")) tracks = [{title:"Seifuku ga Jama wo Suru", ytUrl:SONG_LIBRARY["Seifuku ga Jama wo Suru"]},{title:"Virgin Love", ytUrl:SONG_LIBRARY["Virgin Love"]}];
-        else if(d.Titulo.includes("Keibetsu")) tracks = [{title:"Keibetsu Shiteita Aijo", ytUrl:SONG_LIBRARY["Keibetsu Shiteita Aijo"]},{title:"Namida no Uri no Shoujo", ytUrl:SONG_LIBRARY["Namida no Uri no Shoujo"]}];
-        else if(d.Titulo.includes("BINGO")) tracks = [{title:"BINGO!", ytUrl:SONG_LIBRARY["BINGO!"]},{title:"Only Today", ytUrl:SONG_LIBRARY["Only Today"]}];
+    async function fillStageForm() {
+        const id = document.getElementById('stage-selector').value;
+        if (!id) return resetStageForm();
+
+        const stage = allStages.find(s => s.id == id);
+        if (!stage) return;
+
+        document.getElementById('stage-form-container').style.display = 'block';
+        document.getElementById('st-id').value = stage.id;
+        document.getElementById('st-title').value = stage.Titulo;
+        document.getElementById('st-subtitle').value = stage.Subtitulo || '';
+        document.getElementById('st-date').value = stage.Estreia;
+        document.getElementById('st-status').value = stage.Status;
+        document.getElementById('st-cover').value = stage.Capa;
+        document.getElementById('st-setlist').value = stage.Setlist || '';
         
-        // [FIX 2] Adicionado Fallback para o 5th Single
-        else if(d.Titulo.includes("Yuuhi")) {
-          tracks = [
-            { title: "Yuuhi wo Miteiru ka?", ytUrl: SONG_LIBRARY["Yuuhi wo Miteiru ka?"] },
-            { title: "Viva! Hurricane",      ytUrl: SONG_LIBRARY["Viva! Hurricane"] },
-            { title: "Boku no Taiyou",       ytUrl: SONG_LIBRARY["Boku no Taiyou"] }
-          ];
-        }
-      }
-
-      if(!tracks.length) return alert("Playlist não encontrada para este single.");
-      
-      openIdolPlayer(tracks, 0, d.Titulo, resolveImage(d.Capa));
+        const { data } = await _supabase.from(T_STAGECASTS).select('*').eq('stage_id', id);
+        currentStageCasts = data || [];
+        
+        updateSetlistPreview();
+        renderStageCasts();
     }
 
-    async function init(){
+    function updateSetlistPreview() {
+        const text = document.getElementById('st-setlist').value;
+        const lines = text.split('\n');
+        let html = '';
+        lines.forEach(line => {
+            line = line.trim();
+            if (!line) return;
+            if (line.match(/^M\d+/)) {
+                html += `<span class="setlist-m">${line}</span><br>`;
+            } else if (line.match(/^MC\d+/)) {
+                html += `<span class="setlist-mc">${line}</span><br>`;
+            } else if (line.toLowerCase().includes('encore')) {
+                html += `<div class="setlist-header">${line}</div><br>`;
+            } else {
+                html += `<div>${line}</div>`;
+            }
+        });
+        document.getElementById('st-setlist-preview').innerHTML = html;
+    }
+
+    // === GERENCIAMENTO DE CAST (ELENCO) ===
+    function renderStageCasts() {
+        const div = document.getElementById('st-casts-list');
+        div.innerHTML = '';
+        currentStageCasts.forEach((cast, idx) => {
+            const members = typeof cast.Membros === 'string' ? JSON.parse(cast.Membros) : cast.Membros;
+            const pills = (members || []).map(m => `<span class="cast-member-pill">${m.name}</span>`).join('');
+            
+            div.innerHTML += `
+                <div class="cast-item">
+                    <div class="cast-header">
+                        <span>${cast.Nome}</span>
+                        <div>
+                            <button type="button" style="color:blue; cursor:pointer; background:none; border:none;" onclick="editCast(${idx})">Editar</button>
+                            <button type="button" style="color:red; cursor:pointer; background:none; border:none;" onclick="removeCast(${idx})">X</button>
+                        </div>
+                    </div>
+                    <div class="cast-members">${pills}</div>
+                </div>
+            `;
+        });
+    }
+
+    function openCastModal() {
+        document.getElementById('cast-modal').style.display = 'flex';
+        document.getElementById('c-name').value = '';
+        editingCastIndex = -1;
+        renderCastSelection();
+    }
+
+    function editCast(idx) {
+        editingCastIndex = idx;
+        const cast = currentStageCasts[idx];
+        document.getElementById('c-name').value = cast.Nome;
+        const members = typeof cast.Membros === 'string' ? JSON.parse(cast.Membros) : cast.Membros;
+        const selectedIds = new Set(members.map(m => m.id.toString()));
+        document.getElementById('cast-modal').style.display = 'flex';
+        renderCastSelection('', selectedIds);
+    }
+
+    function closeCastModal() {
+        document.getElementById('cast-modal').style.display = 'none';
+    }
+
+    function renderCastSelection(filter = '', selectedSet = new Set()) {
+        const grid = document.getElementById('cast-selection-grid');
+        grid.innerHTML = '';
+        const q = filter.toLowerCase();
+        
+        allMembers.forEach(m => {
+            if (m.Status === 'Graduada' || m.Status === 'Demitida') return; 
+            if (q && !m.Nome.toLowerCase().includes(q)) return;
+
+            const div = document.createElement('div');
+            div.className = 'select-item ' + (selectedSet.has(m.id.toString()) ? 'selected' : '');
+            div.innerHTML = `<img src="${m.Foto}"><div style="font-size:0.6rem; font-weight:bold;">${m.Nome}</div><div>${m.Time}</div>`;
+            div.onclick = () => { div.classList.toggle('selected'); };
+            div.dataset.id = m.id;
+            div.dataset.name = m.Nome;
+            div.dataset.gen = m.Geracao;
+            grid.appendChild(div);
+        });
+    }
+
+    function saveCastToStage() {
+        const name = document.getElementById('c-name').value;
+        if (!name) return alert("Nome do elenco obrigatório");
+
+        const selectedEls = document.querySelectorAll('.select-item.selected');
+        const members = Array.from(selectedEls).map(el => ({
+            id: el.dataset.id,
+            name: el.dataset.name,
+            gen: el.dataset.gen,
+            isCenter: false 
+        }));
+
+        const castData = { Nome: name, Membros: members };
+
+        if (editingCastIndex >= 0) {
+            if (currentStageCasts[editingCastIndex].id) castData.id = currentStageCasts[editingCastIndex].id;
+            currentStageCasts[editingCastIndex] = castData;
+        } else {
+            currentStageCasts.push(castData);
+        }
+
+        closeCastModal();
+        renderStageCasts();
+    }
+
+    function removeCast(idx) {
+        if (!confirm("Remover este elenco?")) return;
+        currentStageCasts.splice(idx, 1);
+        renderStageCasts();
+    }
+
+    // === SALVAR STAGE ===
+    async function saveStage(e) {
+        e.preventDefault();
+        const id = document.getElementById('st-id').value;
+        const stageData = {
+            Titulo: document.getElementById('st-title').value,
+            Subtitulo: document.getElementById('st-subtitle').value,
+            Estreia: document.getElementById('st-date').value,
+            Status: document.getElementById('st-status').value,
+            Capa: document.getElementById('st-cover').value,
+            Setlist: document.getElementById('st-setlist').value
+        };
+
+        showLoading(true);
+        try {
+            let stageId = id;
+            if (id) {
+                const { error } = await _supabase.from(T_STAGES).update(stageData).eq('id', id);
+                if (error) throw error;
+            } else {
+                const { data, error } = await _supabase.from(T_STAGES).insert(stageData).select();
+                if (error) throw error;
+                stageId = data[0].id;
+            }
+
+            if (stageId) {
+                await _supabase.from(T_STAGECASTS).delete().eq('stage_id', stageId);
+                const castsToInsert = currentStageCasts.map(c => ({
+                    stage_id: stageId,
+                    Nome: c.Nome,
+                    Membros: JSON.stringify(c.Membros)
+                }));
+                
+                if (castsToInsert.length > 0) {
+                    const { error: castErr } = await _supabase.from(T_STAGECASTS).insert(castsToInsert);
+                    if (castErr) throw castErr;
+                }
+            }
+
+            alert("Stage salvo com sucesso!");
+            location.reload();
+
+        } catch (err) {
+            console.error(err);
+            alert("Erro ao salvar: " + err.message);
+        } finally {
+            showLoading(false);
+        }
+    }
+    
+    async function deleteStage() {
+        const id = document.getElementById('st-id').value;
+        if (!id) return;
+        if (!confirm("Tem certeza?")) return;
+
+        showLoading(true);
+        try {
+            await _supabase.from(T_STAGECASTS).delete().eq('stage_id', id);
+            await _supabase.from(T_STAGES).delete().eq('id', id);
+            alert("Stage deletado.");
+            location.reload();
+        } catch (err) {
+            alert("Erro: " + err.message);
+        } finally {
+            showLoading(false);
+        }
+    }
+
+    // === MEMBROS ===
+    async function saveMember(e) {
+        e.preventDefault();
+        const data = {
+            Nome: document.getElementById('m-name').value,
+            Time: document.getElementById('m-team').value,
+            Geracao: document.getElementById('m-gen').value + 'ª Geração',
+            Status: document.getElementById('m-status-select').value,
+            Perfil: document.getElementById('m-bio').value,
+            Foto: document.getElementById('m-photo').value
+        };
+        const { error } = await _supabase.from(T_MEMBERS).insert(data);
+        if (error) alert(error.message); else { alert("Cadastrado!"); location.reload(); }
+    }
+
+    async function updateMember(e) {
+        e.preventDefault();
+        const id = document.getElementById('manage-selector').value;
+        if (!id) return;
+        const data = {
+            Nome: document.getElementById('e-name').value,
+            Time: document.getElementById('e-team').value,
+            Geracao: document.getElementById('e-gen').value + 'ª Geração',
+            Status: document.getElementById('e-status-select').value,
+            Perfil: document.getElementById('e-bio').value,
+            Foto: document.getElementById('e-photo').value
+        };
+        const { error } = await _supabase.from(T_MEMBERS).update(data).eq('id', id);
+        if (error) alert(error.message); else { alert("Atualizado!"); location.reload(); }
+    }
+
+    function renderManageSelect(q = '') {
+        const sel = document.getElementById('manage-selector');
+        sel.innerHTML = '<option value="">Selecione...</option>';
+        allMembers.filter(m => m.Nome.toLowerCase().includes(q.toLowerCase())).forEach(m => {
+            const opt = document.createElement('option');
+            opt.value = m.id;
+            opt.text = m.Nome;
+            sel.appendChild(opt);
+        });
+    }
+
+    function fillEditForm() {
+        const id = document.getElementById('manage-selector').value;
+        const member = allMembers.find(m => m.id == id);
+        if (!member) { document.getElementById('edit-form').style.display='none'; return; }
+        
+        document.getElementById('edit-form').style.display='block';
+        document.getElementById('e-name').value = member.Nome;
+        document.getElementById('e-team').value = member.Time;
+        document.getElementById('e-gen').value = member.Geracao.replace(/\D/g,'');
+        document.getElementById('e-status-select').value = member.Status;
+        document.getElementById('e-photo').value = member.Foto;
+        document.getElementById('e-preview').src = member.Foto;
+        document.getElementById('e-bio').value = member.Perfil || '';
+    }
+
+    // === NEWS ===
+    async function saveNews(e) {
+      e.preventDefault();
+      showLoading(true, "Publicando...");
       try {
-        initPlayers(); initYT();
-        const { data, error } = await db.from(T_DISCO).select("*");
-        if(error) throw error;
-        discos = (data||[]).sort((a,b)=>getIdSafe(b)-getIdSafe(a));
-        
-        if(discos.length){
-           const top = discos[0];
-           $("heroTitle").textContent = top.Titulo;
-           $("heroSub").textContent = `${top.Tipo||"Single"}${top.Center?" • Center: "+top.Center:""}`;
-           $("heroCover").src = resolveImage(top.Capa);
-        }
-        $("status").textContent = "";
-        renderGrid(discos);
-      } catch(e) {
-        console.error(e);
-        $("status").textContent = "Erro ao carregar.";
+        const { error } = await _supabase.from(T_NEWS).insert({
+          Titulo: val('n-title'),
+          Categoria: val('n-cat'),
+          Data: val('n-date'),
+          Texto: val('n-text')
+        });
+        if (error) throw error;
+        alert("Notícia publicada!");
+        location.reload();
+      } catch (err) {
+        console.error(err);
+        showLoading(false);
+        alert("Erro: " + err.message);
       }
     }
+
+    // === DISCOGRAFIA (Add/Edit) ===
+    async function saveDisco(e) {
+      e.preventDefault();
+      if (!tracksBuffer.length) return alert("Adicione músicas!");
+      showLoading(true, "Salvando...");
+      try {
+        const html = buildHTML();
+        const centerStr = tracksBuffer[0] ? (tracksBuffer[0].members || []).filter(m => m.isCenter).map(m => m.name).join(' & ') : '';
+        const { data, error } = await _supabase.from(T_DISCO).insert({
+          Titulo: val('d-title'),
+          Tipo: val('d-type'),
+          Center: centerStr || val('d-center'),
+          Data: val('d-date'),
+          Capa: val('d-cover'),
+          Tracklist: html
+        }).select();
+        if (error) throw error;
+        alert("Sucesso!");
+        location.reload();
+      } catch (err) {
+        console.error(err);
+        showLoading(false);
+        alert("Erro: " + err.message);
+      }
+    }
+
+    function fillDiscoEditForm() {
+      const id = $('disco-selector')?.value;
+      const box = $('disco-edit-form');
+      if (!id) { box.style.display = 'none'; currentEditingDiscoId = null; return; }
+      currentEditingDiscoId = id;
+      const rec = allDiscos.find(r => r.id == id);
+      if (!rec) return;
+      const f = rec.fields;
+      $('ed-title').value = f.Titulo || '';
+      $('ed-type').value = f.Tipo || 'Single';
+      $('ed-date').value = (f.Data || '').slice(0, 10);
+      $('ed-center').value = f.Center || '';
+      $('ed-cover').value = f.Capa || '';
+      const oldHTML = f.Tracklist || '';
+      tracksBuffer = parseHTMLToTracks(oldHTML);
+      updateTracks(true);
+      box.style.display = 'block';
+    }
+
+    async function updateDisco(e) {
+      e.preventDefault();
+      const id = currentEditingDiscoId;
+      if (!id) return;
+      showLoading(true, "Atualizando...");
+      try {
+        const html = buildHTML();
+        const centerStr = tracksBuffer[0] ? (tracksBuffer[0].members || []).filter(m => m.isCenter).map(m => m.name).join(' & ') : '';
+        const { error } = await _supabase.from(T_DISCO).update({
+          Tipo: val('ed-type'),
+          Data: val('ed-date'),
+          Center: centerStr,
+          Capa: val('ed-cover'),
+          Tracklist: html
+        }).eq('id', id);
+        if (error) throw error;
+        alert("Atualizado!");
+        location.reload();
+      } catch (err) {
+        console.error(err);
+        showLoading(false);
+        alert("Erro: " + err.message);
+      }
+    }
+
+    // === BUILDER (Formação) ===
+    function openBuilder(isEdit) {
+      builderIsEditMode = !!isEdit;
+      $('builder-modal').style.display = 'flex';
+      $('builder-modal').classList.add('active');
+      $('step-1').style.display = 'block';
+      $('step-2').style.display = 'none';
+      if (!$('row-inputs').children.length) renderRowInputs();
+      $('b-song').value = '';
+      $('b-unit-name').value = '';
+      toggleKindRules();
+      syncRowsUI();
+    }
+
+    function closeBuilder() { $('builder-modal').classList.remove('active'); $('builder-modal').style.display = 'none'; }
+    function backToFormationMenu() { $('step-2').style.display='none'; $('step-1').style.display='block'; }
+    function syncRowsUI() { $('rows-total').innerText = parseInt(val('b-total'))||0; updateRowsSum(); }
+    
+    function renderRowInputs() {
+        const w=$('row-inputs'), c=parseInt(val('b-rowcount'))||3, old=[...w.querySelectorAll('.row-count-input')].map(i=>parseInt(i.value)||0);
+        w.innerHTML='';
+        for(let i=0;i<c;i++) w.innerHTML+=`<div class="rowline"><div class="row-tag">${i===0?'Frente':(i===c-1?'Fundo':`Meio ${i}`)}</div><input type="number" min="0" class="row-count-input" value="${old[i]||0}" oninput="updateRowsSum()"></div>`;
+        updateRowsSum();
+    }
+    
+    function updateRowsSum() { const s=[...document.querySelectorAll('.row-count-input')].reduce((a,b)=>a+(parseInt(b.value)||0),0); $('rows-sum').innerText=s; $('rows-sum').style.color=(s===(parseInt(val('b-total'))||0))?'#00b894':'#e91e63'; }
+    function toggleKindRules() { const k=val('b-kind'); $('unit-fields').style.display=(k==='Unit')?'block':'none'; if(k==='Solo'){ $('b-total').value=1; $('b-centers').value=1; $('b-rowcount').value=1; renderRowInputs(); document.querySelector('.row-count-input').value=1; syncRowsUI(); } }
+
+    function startStage() {
+        const t=parseInt(val('b-total'))||0, inps=[...document.querySelectorAll('.row-count-input')].map(i=>parseInt(i.value)||0);
+        if(inps.reduce((a,b)=>a+b,0)!==t) return alert("Soma incorreta.");
+        const c=parseInt(val('b-centers'))||0, f=inps[0]||0; let ci=[];
+        if(c>0&&f>0) { const s=Math.floor((f-c)/2); for(let k=0;k<c;k++) ci.push(s+k); }
+        $('slots').innerHTML=''; const rw=document.createElement('div'); rw.className='rows-wrap';
+        function bf(r,j){ const rc=inps[r]||0, cum=inps.slice(0,r+1).reduce((a,b)=>a+b,0); return (r===0)?(cum-rc+1)+j:cum-j; }
+        for(let r=inps.length-1;r>=0;r--){
+            const rd=document.createElement('div'); rw.className='slots-row'; const isf=(r===0);
+            for(let j=0;j<inps[r];j++){
+                const d=document.createElement('div'); d.className='slot'; if(isf&&ci.includes(j)) d.classList.add('is-center');
+                d.innerHTML=`<div class="slot-badge">${bf(r,j)}</div><div class="slot-circle"><i class="fas fa-plus" style="color:#ddd"></i></div><div class="slot-name">-</div>`;
+                d.onclick=()=>openMemberModalForBuilder(d); rd.appendChild(d);
+            }
+            rw.appendChild(rd);
+        }
+        $('slots').appendChild(rw); $('step-1').style.display='none'; $('step-2').style.display='block';
+    }
+
+    function openMemberModalForBuilder(el) { activeSlot=el; $('member-select-modal').style.display='flex'; $('member-search').value=''; renderMemberSelectionList(''); }
+    function closeMemberModal() { $('member-select-modal').style.display='none'; activeSlot=null; }
+    function selectMember(m) { if(!activeSlot)return; const p=resolveImage(m.photo)||'https://placehold.co/100?text=?'; activeSlot.querySelector('.slot-circle').innerHTML=`<img src="${p}" onerror="this.src='https://placehold.co/100?text=?'">`; activeSlot.querySelector('.slot-name').innerText=m.name; activeSlot.dataset.id=m.id; activeSlot.dataset.name=m.name; activeSlot.dataset.gen=m.gen||''; closeMemberModal(); }
+    function clearSlot() { if(activeSlot){ activeSlot.querySelector('.slot-circle').innerHTML='<i class="fas fa-plus" style="color:#ddd"></i>'; activeSlot.querySelector('.slot-name').innerText='-'; delete activeSlot.dataset.id; delete activeSlot.dataset.name; delete activeSlot.dataset.gen; } closeMemberModal(); }
+    
+    function finishTrack() {
+        const n=val('b-song').trim(); if(!n) return alert("Nome?");
+        const s=[...document.querySelectorAll('.slot')].filter(el=>el.dataset.id); if(!s.length) return alert("Selecione membros.");
+        const m=s.map(el=>({ id:el.dataset.id, name:el.dataset.name, gen:el.dataset.gen||'', isCenter:el.classList.contains('is-center') }));
+        tracksBuffer.push({ name:n, kind:val('b-kind'), unitName:val('b-unit-name'), members:m, html:null });
+        updateTracks(builderIsEditMode); closeBuilder(true);
+    }
+
+    function updateTracks(isEdit) { 
+        const c=$(isEdit?'ed-tracks-list':'tracks-list'); 
+        c.innerHTML=tracksBuffer.length?'':'<div style="text-align:center;color:#999;font-size:.85rem;">Vazio</div>'; 
+        tracksBuffer.forEach((t,i)=>{ c.innerHTML+=`<div class="track-item"><div class="track-info"><b>${t.name}</b> <span class="badge">${t.kind}</span></div><div class="track-actions"><button type="button" class="btn-icon delete" onclick="removeTrack(${i},${isEdit})">✕</button></div></div>`; }); 
+    }
+    
+    function removeTrack(i, isEdit) { tracksBuffer.splice(i, 1); updateTracks(isEdit); }
+
+    // --- HTML GENERATORS ---
+    function buildHTML() {
+      let html = `<div class="modal-nav"><button class="modal-nav-btn active" data-section="tracklist">Tracklist</button><button class="modal-nav-btn" data-section="formacao">Formação</button></div><div class="details-content"><div class="modal-section active" data-section="tracklist"><ol class="tracklist">`;
+      let forms = `<div class="modal-section" data-section="formacao">`;
+      tracksBuffer.forEach((t, index) => {
+        const kindClass = normalizeKind(t.kind);
+        const unitTxt = (String(t.unitName || '').trim()) ? ` • ${t.unitName}` : '';
+        html += `<li><a>${t.name}</a> <span class="label ${kindClass}">${t.kind}${unitTxt}</span></li>`;
+        forms += `<div class="formation-group"><div class="formation-title">${(String(t.kind) === 'Unit') ? '<i class="fas fa-users"></i>' : ''} ${t.name}</div><div class="member-grid">`;
+        (t.members || []).forEach(mem => {
+          let full = allMembers.find(am => am.id == mem.id);
+          if (!full && mem.name) full = allMembers.find(am => am.name === mem.name);
+          const centerClass = mem.isCenter ? 'is-center' : '';
+          const photo = full?.photo || 'https://placehold.co/300?text=?';
+          const name = full?.name || mem.name || '???';
+          const genTxt = formatGen(full?.gen || mem.gen || '');
+          if (full) mem.id = full.id;
+          forms += `<a class="member-card-static ${centerClass}" data-id="${mem.id || ''}"><div class="member-photo"><img src="${photo}" loading="lazy"></div><div class="member-info"><h3>${name}</h3><p>${genTxt || ''}</p></div></a>`;
+        });
+        forms += `</div></div>`;
+        if (index < tracksBuffer.length - 1) forms += `<hr class="formation-separator"/>`;
+      });
+      forms += `</div></div>`;
+      const hiddenData = `<div id="ctl48-formation-data" style="display:none;">${JSON.stringify(tracksBuffer)}</div>`;
+      return html + `</ol></div>` + forms + hiddenData + `</div>`;
+    }
+
+    function normalizeKind(k) { const s=String(k||'').trim().toLowerCase(); if(s.includes('a-side'))return 'a-side'; if(s.includes('under'))return 'undergirls'; if(s.includes('unit'))return 'unit'; if(s.includes('solo'))return 'solo'; return 'b-side'; }
+    function formatGen(g) { const n=g?String(g).replace(/\D/g,''):''; return n?`${n}ª Gen`:''; }
+    function parseHTMLToTracks(h) { if(!h)return[]; const t=document.createElement('div'); t.innerHTML=h; const el=t.querySelector('#ctl48-formation-data'); if(el){ try{return JSON.parse(el.innerText).map(x=>({...x,html:null}));}catch(e){} } return []; }
+
+    function showLoading(show) { document.getElementById('loading-overlay').style.display = show ? 'flex' : 'none'; }
+    function setLoadingLog(m) {}
 
     init();
   </script>
