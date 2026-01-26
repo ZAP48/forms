@@ -330,7 +330,10 @@
         <label>Capa (URL ou Upload)</label>
         <div class="input-group">
           <input id="d-cover" placeholder="https://..." required />
-          <button type="button" class="btn-upload" onclick="alert('Use o upload de imagem nas outras abas se precisar')"><i class="fas fa-image"></i></button>
+          <input type="file" id="d-cover-file" style="display:none" accept="image/*"
+            onchange="uploadImage(this, 'd-cover', 'd-upload-status')" />
+          <button type="button" class="btn-upload" onclick="document.getElementById('d-cover-file').click()"><i
+              class="fas fa-upload"></i></button>
         </div>
         <div id="d-upload-status" class="upload-status"></div>
 
@@ -366,7 +369,16 @@
             <div style="flex:1"><label>Data</label><input type="date" id="ed-date" required /></div>
           </div>
           <label>Center (Auto)</label><input id="ed-center" />
-          <label>Capa</label><input id="ed-cover" required />
+          <label>Capa</label>
+          
+          <div class="input-group">
+            <input id="ed-cover" required />
+            <input type="file" id="ed-cover-file" style="display:none" accept="image/*"
+              onchange="uploadImage(this, 'ed-cover', 'ed-upload-status')" />
+            <button type="button" class="btn-upload" onclick="document.getElementById('ed-cover-file').click()"><i
+                class="fas fa-upload"></i></button>
+          </div>
+          <div id="ed-upload-status" class="upload-status"></div>
 
           <div style="margin-top:20px; border-top:1px solid #eee; padding-top:15px;">
             <label style="color:#2196f3;">Lista de Músicas (Editar)</label>
@@ -414,7 +426,12 @@
             <label>Capa (URL)</label>
             <div class="input-group">
                 <input id="st-cover" placeholder="https://...">
+                <input type="file" id="st-cover-file" style="display:none" accept="image/*"
+                  onchange="uploadImage(this, 'st-cover', 'st-upload-status')" />
+                <button type="button" class="btn-upload" onclick="document.getElementById('st-cover-file').click()"><i
+                    class="fas fa-upload"></i></button>
             </div>
+            <div id="st-upload-status" class="upload-status"></div>
 
             <label>Setlist (Texto Longo)</label>
             <textarea id="st-setlist" rows="10" placeholder="Cole a setlist aqui (M01... MC1...)" oninput="updateSetlistPreview()"></textarea>
@@ -1091,6 +1108,35 @@
         console.error(err);
         showLoading(false);
         alert("Erro: " + err.message);
+      }
+    }
+
+    // === IMG UPLOAD ===
+    async function uploadImage(input, targetId, statusId) {
+      const file = input.files[0];
+      if (!file) return;
+      const statusEl = $(statusId);
+      const targetEl = $(targetId);
+      statusEl.innerText = "⏳ Enviando...";
+      try {
+        const base64 = await new Promise((r, j) => {
+          const fr = new FileReader();
+          fr.onload = () => r(fr.result);
+          fr.onerror = j;
+          fr.readAsDataURL(file);
+        });
+        const form = new URLSearchParams();
+        form.append("key", IMGBB_KEY);
+        form.append("image", String(base64).split(",")[1]);
+        const res = await fetch("https://api.imgbb.com/1/upload", { method: "POST", body: form });
+        const data = await res.json();
+        if (!data?.success) throw new Error("Erro upload");
+        targetEl.value = data.data.url;
+        statusEl.innerText = "✅ Ok!";
+        if (targetId === 'e-photo') $('e-preview').src = data.data.url;
+      } catch (e) {
+        console.error(e);
+        statusEl.innerText = "❌ Erro";
       }
     }
 
