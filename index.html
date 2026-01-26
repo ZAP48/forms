@@ -1,245 +1,67 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>ZAP48 Admin (Stages Ultimate)</title>
-
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
   <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
   <style>
-    :root {
-      --primary: #8ACE00; /* Verde ZAP48 */
-      --secondary: #000000;
-      --bg: #f4f6f8;
-      --mc-bg: #f0f0f0;
-      --music-color: #e91e63;
-    }
-
-    body {
-      background: var(--bg);
-      margin: 0;
-      padding-bottom: 100px;
-      font-family: 'Roboto', sans-serif;
-      color: #333;
-    }
-
-    .header {
-      background: #000;
-      padding: 15px;
-      text-align: center;
-      color: var(--primary);
-      font-weight: 900;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, .1);
-      font-size: 1.2rem;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .menu-toggle {
-        display: none; /* Hidden on desktop */
-        background: none;
-        border: none;
-        color: var(--primary);
-        font-size: 1.5rem;
-        cursor: pointer;
-    }
-
-    /* Mobile Menu Overlay */
-    .mobile-menu-overlay {
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1001; display: none;
-    }
-
-    .mobile-menu {
-        position: fixed; top: 0; left: -280px; width: 280px; height: 100%; background: #fff; z-index: 1002; transition: left 0.3s ease; padding-top: 60px; box-shadow: 2px 0 10px rgba(0,0,0,0.2);
-    }
-
-    .mobile-menu.open { left: 0; }
-
-    .mobile-menu-item {
-        display: block; padding: 15px 20px; color: #333; text-decoration: none; font-weight: 700; border-bottom: 1px solid #eee; cursor: pointer; display: flex; align-items: center; gap: 10px;
-    }
-    
-    .mobile-menu-item.active { background-color: #f0f0f0; color: #000; border-left: 5px solid var(--primary); }
-    .mobile-menu-item i { font-size: 1.2rem; width: 24px; text-align: center; }
-
-    .mobile-menu-close {
-        position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #000;
-    }
-
-    /* Media Query for Mobile */
-    @media (max-width: 768px) {
-        .bottom-nav { display: none; }
-        .menu-toggle { display: block; }
-        body { padding-bottom: 0; }
-    }
-
-    .section {
-      display: none;
-      padding: 15px;
-      animation: fadeIn .25s;
-    }
-
-    .section.active {
-      display: block;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .card {
-      background: #fff;
-      padding: 20px;
-      border-radius: 12px;
-      margin-bottom: 15px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, .05);
-      border: 1px solid #eee;
-    }
-
+    :root { --primary: #8ACE00; --secondary: #000000; --bg: #f4f6f8; --mc-bg: #f0f0f0; --music-color: #e91e63; }
+    body { background: var(--bg); margin: 0; padding-bottom: 100px; font-family: 'Roboto', sans-serif; color: #333; }
+    .header { background: #000; padding: 15px; text-align: center; color: var(--primary); font-weight: 900; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 10px rgba(0,0,0,.1); font-size: 1.2rem; text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between; align-items: center; }
+    .menu-toggle { display: none; background: none; border: none; color: var(--primary); font-size: 1.5rem; cursor: pointer; }
+    .section { display: none; padding: 15px; animation: fadeIn .25s; }
+    .section.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .card { background: #fff; padding: 20px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 10px rgba(0,0,0,.05); border: 1px solid #eee; }
     h2 { margin-top: 0; color: #000; font-weight: 900; }
-
-    label {
-      display: block;
-      font-size: .75rem;
-      font-weight: 900;
-      color: #666;
-      margin-top: 14px;
-      margin-bottom: 6px;
-      text-transform: uppercase;
-      letter-spacing: .5px;
-    }
-
-    input, select, textarea {
-      width: 100%;
-      padding: 12px;
-      border: 2px solid #ddd;
-      border-radius: 8px;
-      background: #fff;
-      font-size: 1rem;
-      transition: .2s;
-      color: #333;
-      font-family: inherit;
-      font-weight: 500;
-      box-sizing: border-box;
-    }
-    
-    input:focus, select:focus, textarea:focus {
-        border-color: var(--primary);
-        outline: none;
-    }
-
+    label { display: block; font-size: .75rem; font-weight: 900; color: #666; margin-top: 14px; margin-bottom: 6px; text-transform: uppercase; letter-spacing: .5px; }
+    input, select, textarea { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; background: #fff; font-size: 1rem; transition: .2s; color: #333; font-family: inherit; font-weight: 500; box-sizing: border-box; }
+    input:focus, select:focus, textarea:focus { border-color: var(--primary); outline: none; }
     textarea { resize: vertical; }
-
-    .btn-main {
-      width: 100%;
-      padding: 15px;
-      background: var(--primary);
-      color: #000;
-      border: 2px solid #000;
-      border-radius: 8px;
-      font-weight: 900;
-      margin-top: 16px;
-      font-size: 1rem;
-      cursor: pointer;
-      text-transform: uppercase;
-      box-shadow: 4px 4px 0 #000;
-      transition: transform 0.1s;
-    }
-
+    .btn-main { width: 100%; padding: 15px; background: var(--primary); color: #000; border: 2px solid #000; border-radius: 8px; font-weight: 900; margin-top: 16px; font-size: 1rem; cursor: pointer; text-transform: uppercase; box-shadow: 4px 4px 0 #000; transition: transform 0.1s; }
     .btn-main:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 #000; }
-
-    .btn-ghost {
-      width: 100%;
-      padding: 12px;
-      border-radius: 8px;
-      font-weight: 900;
-      border: 2px solid #ddd;
-      background: #fff;
-      color: #555;
-      cursor: pointer;
-      text-transform: uppercase;
-      font-size: 0.8rem;
-    }
-
+    .btn-ghost { width: 100%; padding: 12px; border-radius: 8px; font-weight: 900; border: 2px solid #ddd; background: #fff; color: #555; cursor: pointer; text-transform: uppercase; font-size: 0.8rem; }
     .input-group { display: flex; gap: 8px; align-items: center; margin-top: 5px; }
-
-    .btn-upload {
-      background: #333;
-      color: #fff;
-      border: none;
-      padding: 12px 15px;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-
+    .btn-upload { background: #333; color: #fff; border: none; padding: 12px 15px; border-radius: 8px; cursor: pointer; }
     .upload-status { font-size: .78rem; color: var(--primary); margin-top: 6px; font-weight: 900; min-height: 15px; }
-
-    /* Bottom Nav for Desktop/Large Screens */
-    .bottom-nav {
-      position: fixed; bottom: 0; width: 100%; height: 70px; background: #000; display: flex; border-top: 4px solid var(--primary); z-index: 1000;
-    }
-
-    .nav-item {
-      flex: 1; border: none; background: none; color: #666; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: .65rem; font-weight: 900; cursor: pointer; text-transform: uppercase;
-    }
-
+    .bottom-nav { position: fixed; bottom: 0; width: 100%; height: 70px; background: #000; display: flex; border-top: 4px solid var(--primary); z-index: 1000; }
+    .nav-item { flex: 1; border: none; background: none; color: #666; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: .65rem; font-weight: 900; cursor: pointer; text-transform: uppercase; }
     .nav-item.active { color: var(--primary); }
     .nav-item i { font-size: 1.4rem; margin-bottom: 4px; }
-
-    /* LOADING */
-    #loading-overlay {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, .95); z-index: 5000; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center;
-    }
+    .mobile-menu-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1001; display: none; }
+    .mobile-menu { position: fixed; top: 0; left: -280px; width: 280px; height: 100%; background: #fff; z-index: 1002; transition: left 0.3s ease; padding-top: 60px; box-shadow: 2px 0 10px rgba(0,0,0,0.2); }
+    .mobile-menu.open { left: 0; }
+    .mobile-menu-item { display: block; padding: 15px 20px; color: #333; text-decoration: none; font-weight: 700; border-bottom: 1px solid #eee; cursor: pointer; display: flex; align-items: center; gap: 10px; }
+    .mobile-menu-item.active { background-color: #f0f0f0; color: #000; border-left: 5px solid var(--primary); }
+    .mobile-menu-close { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #000; }
+    @media (max-width: 768px) { .bottom-nav { display: none; } .menu-toggle { display: block; } body { padding-bottom: 0; } }
+    #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, .95); z-index: 5000; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
     .spinner { border: 5px solid #f3f3f3; border-top: 5px solid var(--primary); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 20px; }
     @keyframes spin { 0% { transform: rotate(0) } 100% { transform: rotate(360deg) } }
-
-    /* MODAL */
-    .modal-overlay {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: none; flex-direction: column; overflow-y: auto;
-    }
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: none; flex-direction: column; overflow-y: auto; }
     .modal-overlay.active { display: flex; }
-    .modal-box {
-        background: #fff; width: 95%; max-width: 600px; margin: auto; border-radius: 12px; padding: 20px; box-sizing: border-box; position: relative;
-    }
+    .modal-box { background: #fff; width: 95%; max-width: 600px; margin: auto; border-radius: 12px; padding: 20px; box-sizing: border-box; position: relative; }
     .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
     .modal-header h3 { margin: 0; text-transform: uppercase; }
     .close-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; font-weight: bold; }
-
-    /* --- STAGE & SETLIST CSS --- */
-    .setlist-preview {
-        background: #fafafa; border: 2px dashed #ddd; padding: 15px; border-radius: 8px; margin-top: 10px; max-height: 300px; overflow-y: auto; font-size: 0.9rem;
-    }
+    .setlist-preview { background: #fafafa; border: 2px dashed #ddd; padding: 15px; border-radius: 8px; margin-top: 10px; max-height: 300px; overflow-y: auto; font-size: 0.9rem; }
     .setlist-m { color: var(--music-color); font-weight: 700; margin-bottom: 4px; display: block; }
     .setlist-mc { background: var(--mc-bg); color: #333; font-weight: 900; font-style: italic; padding: 4px 8px; border-radius: 4px; display: inline-block; margin: 8px 0; font-size: 0.8rem; }
     .setlist-header { font-size: 1.1rem; font-weight: 900; text-transform: uppercase; border-bottom: 3px solid var(--primary); display: inline-block; margin-top: 15px; margin-bottom: 5px; }
-    
-    /* CAST MANAGEMENT */
     .cast-item { background: #fff; border: 1px solid #ddd; padding: 10px; margin-bottom: 8px; border-radius: 8px; }
     .cast-header { display: flex; justify-content: space-between; align-items: center; font-weight: 900; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 5px; }
     .cast-members { display: flex; flex-wrap: wrap; gap: 5px; }
     .cast-member-pill { background: #eee; font-size: 0.7rem; padding: 3px 8px; border-radius: 4px; display: flex; align-items: center; gap: 5px; }
-    
-    /* SELECTION GRID */
     .selection-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 8px; max-height: 50vh; overflow-y: auto; padding: 5px; }
     .select-item { text-align: center; cursor: pointer; padding: 5px; border-radius: 8px; border: 1px solid transparent; }
     .select-item:hover { background: #f0f0f0; }
     .select-item.selected { background: #e8f5e9; border-color: var(--primary); }
     .select-item img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #ddd; }
     .select-item div { font-size: 0.7rem; font-weight: 700; margin-top: 4px; line-height: 1.1; }
-
-    /* BUILDER STYLES */
     .builder-modal-header { padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: #fff; z-index: 10; }
     .builder-stage-area { padding: 20px; }
     .rows-panel { margin-top: 10px; padding: 12px; border: 1px solid #eee; border-radius: 12px; background: #fafafa; }
@@ -256,25 +78,18 @@
     .slot.is-center .slot-badge { background: #e91e63; }
     .slot img { width: 100%; height: 100%; object-fit: cover; }
     .slot-name { font-size: .68rem; margin-top: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 900; }
-
-    /* TRACK ITEM */
     .track-item { background: #fff0f5; padding: 10px 12px; border-radius: 10px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #ffc1e3; gap: 10px; }
     .track-info { flex: 1; }
     .track-actions { display: flex; gap: 4px; align-items: center; }
     .btn-icon { border: none; background: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #555; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05); }
     .btn-icon.delete { color: #f44336; background: #ffebee; }
     .badge { font-size: .72rem; font-weight: 900; border-radius: 999px; padding: 4px 10px; background: #333; color: #fff; text-transform: uppercase; display: inline-block; margin-left: 6px; }
-
   </style>
 </head>
-
 <body>
-
   <div class="header">
-      <button class="menu-toggle" onclick="toggleMenu()">☰</button>
-      ZAP48 Admin
-      <div style="width: 24px;"></div> </div>
-
+      <button class="menu-toggle" onclick="toggleMenu()">☰</button> ZAP48 Admin <div style="width: 24px;"></div> 
+  </div>
   <div class="mobile-menu-overlay" onclick="toggleMenu()"></div>
   <div class="mobile-menu" id="mobileMenu">
       <button class="mobile-menu-close" onclick="toggleMenu()">✕</button>
@@ -285,25 +100,16 @@
       <div class="mobile-menu-item" onclick="nav('members', this)"><i class="fas fa-user-plus"></i> Novo Membro</div>
       <div class="mobile-menu-item" onclick="nav('manage', this)"><i class="fas fa-user-edit"></i> Editar Membro</div>
   </div>
-
   <div id="loading-overlay">
-    <div class="spinner"></div>
-    <div id="loading-text">Processando...</div>
+    <div class="spinner"></div><div id="loading-text">Processando...</div>
   </div>
 
   <div id="tab-news" class="section">
     <div class="card">
       <h2>📢 Nova Notícia</h2>
-      <p>Publique atualizações, eventos ou avisos importantes.</p>
       <form onsubmit="saveNews(event)">
         <label>Título</label><input id="n-title" required />
-        <label>Categoria</label>
-        <select id="n-cat">
-          <option>Release</option>
-          <option>Event</option>
-          <option>Notice</option>
-          <option>Theater</option>
-        </select>
+        <label>Categoria</label><select id="n-cat"><option>Release</option><option>Event</option><option>Notice</option><option>Theater</option></select>
         <label>Data</label><input type="date" id="n-date" required />
         <label>Conteúdo</label><textarea id="n-text" rows="5"></textarea>
         <button class="btn-main">Publicar</button>
@@ -314,36 +120,24 @@
   <div id="tab-disco" class="section">
     <div class="card">
       <h2>💿 Adicionar Música</h2>
-      <p>Cadastre novos singles, álbuns ou stages.</p>
       <form onsubmit="saveDisco(event)">
         <label>Título</label><input id="d-title" required placeholder="Ex: 10th Single" />
         <div style="display:flex; gap:10px;">
-          <div style="flex:1"><label>Tipo</label><select id="d-type">
-              <option>Single</option>
-              <option>Album</option>
-              <option>Stage</option>
-            </select></div>
+          <div style="flex:1"><label>Tipo</label><select id="d-type"><option>Single</option><option>Album</option><option>Stage</option></select></div>
           <div style="flex:1"><label>Data</label><input type="date" id="d-date" required /></div>
         </div>
         <label>Center (Auto)</label><input id="d-center" readonly style="background:#eee;" />
-
         <label>Capa (URL ou Upload)</label>
         <div class="input-group">
           <input id="d-cover" placeholder="https://..." required />
-          <input type="file" id="d-cover-file" style="display:none" accept="image/*"
-            onchange="uploadImage(this, 'd-cover', 'd-upload-status')" />
-          <button type="button" class="btn-upload" onclick="document.getElementById('d-cover-file').click()"><i
-              class="fas fa-upload"></i></button>
+          <input type="file" id="d-cover-file" style="display:none" accept="image/*" onchange="uploadImage(this, 'd-cover', 'd-upload-status')" />
+          <button type="button" class="btn-upload" onclick="document.getElementById('d-cover-file').click()"><i class="fas fa-upload"></i></button>
         </div>
         <div id="d-upload-status" class="upload-status"></div>
-
         <div style="margin-top:16px; border-top:1px solid #eee; padding-top:14px;">
           <label>Músicas & Formações</label>
-          <div id="tracks-list">
-            <div style="text-align:center;color:#999;font-size:.85rem;">Vazio</div>
-          </div>
-          <button type="button" class="btn-main" style="background:#333; margin-top:10px;"
-            onclick="openBuilder(false)">+ Adicionar Faixa</button>
+          <div id="tracks-list"><div style="text-align:center;color:#999;font-size:.85rem;">Vazio</div></div>
+          <button type="button" class="btn-main" style="background:#333; margin-top:10px;" onclick="openBuilder(false)">+ Adicionar Faixa</button>
         </div>
         <button class="btn-main">Salvar Tudo</button>
       </form>
@@ -353,43 +147,30 @@
   <div id="tab-managedisco" class="section">
     <div class="card">
       <h2>🗂️ Editar Música</h2>
-      <p>Gerencie e atualize informações da discografia existente.</p>
-      <select id="disco-selector" onchange="fillDiscoEditForm()">
-        <option value="">Carregando...</option>
-      </select>
+      <select id="disco-selector" onchange="fillDiscoEditForm()"><option value="">Carregando...</option></select>
       <div id="disco-edit-form" style="display:none; margin-top:15px;">
         <form onsubmit="updateDisco(event)">
           <label>Título</label><input id="ed-title" readonly style="background:#eee; color:#777;" />
           <div style="display:flex; gap:10px;">
-            <div style="flex:1"><label>Tipo</label><select id="ed-type">
-                <option>Single</option>
-                <option>Album</option>
-                <option>Stage</option>
-              </select></div>
+            <div style="flex:1"><label>Tipo</label><select id="ed-type"><option>Single</option><option>Album</option><option>Stage</option></select></div>
             <div style="flex:1"><label>Data</label><input type="date" id="ed-date" required /></div>
           </div>
           <label>Center (Auto)</label><input id="ed-center" />
           <label>Capa</label>
-          
           <div class="input-group">
             <input id="ed-cover" required />
-            <input type="file" id="ed-cover-file" style="display:none" accept="image/*"
-              onchange="uploadImage(this, 'ed-cover', 'ed-upload-status')" />
-            <button type="button" class="btn-upload" onclick="document.getElementById('ed-cover-file').click()"><i
-                class="fas fa-upload"></i></button>
+            <input type="file" id="ed-cover-file" style="display:none" accept="image/*" onchange="uploadImage(this, 'ed-cover', 'ed-upload-status')" />
+            <button type="button" class="btn-upload" onclick="document.getElementById('ed-cover-file').click()"><i class="fas fa-upload"></i></button>
           </div>
           <div id="ed-upload-status" class="upload-status"></div>
-
           <div style="margin-top:20px; border-top:1px solid #eee; padding-top:15px;">
             <label style="color:#2196f3;">Lista de Músicas (Editar)</label>
             <div id="ed-tracks-list" style="margin-bottom:15px;"></div>
-            <button type="button" class="btn-ghost" style="font-size:.9rem;" onclick="openBuilder(true)">+ Adicionar Nova
-              Música</button>
+            <button type="button" class="btn-ghost" style="font-size:.9rem;" onclick="openBuilder(true)">+ Adicionar Nova Música</button>
           </div>
           <button class="btn-main" style="background:#2196f3;">Salvar Alterações</button>
         </form>
-        <button class="btn-main" style="background:#f44336; margin-top:25px;" onclick="deleteDisco()">Deletar Disco
-          (Cascade)</button>
+        <button class="btn-main" style="background:#f44336; margin-top:25px;" onclick="deleteDisco()">Deletar Disco (Cascade)</button>
       </div>
     </div>
   </div>
@@ -401,48 +182,28 @@
          <button class="btn-ghost" onclick="resetStageForm()" style="flex:1;">+ Novo Stage</button>
          <select id="stage-selector" onchange="fillStageForm()" style="flex:2;"><option>Carregando...</option></select>
       </div>
-      
       <div id="stage-form-container" style="display:none;">
           <form onsubmit="saveStage(event)">
             <input type="hidden" id="st-id">
-            
-            <label>Título do Stage</label>
-            <input id="st-title" required placeholder="Ex: ZAP48 1st Stage">
-            
-            <label>Subtítulo</label>
-            <input id="st-subtitle" placeholder="Ex: 'Party ga Hajimaru yo'">
-            
+            <label>Título do Stage</label><input id="st-title" required placeholder="Ex: ZAP48 1st Stage">
+            <label>Subtítulo</label><input id="st-subtitle" placeholder="Ex: 'Party ga Hajimaru yo'">
             <div style="display:flex; gap:10px;">
                 <div style="flex:1"><label>Estreia</label><input type="date" id="st-date"></div>
-                <div style="flex:1"><label>Status</label>
-                    <select id="st-status">
-                        <option>Em Cartaz</option>
-                        <option>Finalizado</option>
-                        <option>Breve</option>
-                    </select>
-                </div>
+                <div style="flex:1"><label>Status</label><select id="st-status"><option>Em Cartaz</option><option>Finalizado</option><option>Breve</option></select></div>
             </div>
-            
             <label>Capa (URL)</label>
             <div class="input-group">
                 <input id="st-cover" placeholder="https://...">
-                <input type="file" id="st-cover-file" style="display:none" accept="image/*"
-                  onchange="uploadImage(this, 'st-cover', 'st-upload-status')" />
-                <button type="button" class="btn-upload" onclick="document.getElementById('st-cover-file').click()"><i
-                    class="fas fa-upload"></i></button>
+                <input type="file" id="st-cover-file" style="display:none" accept="image/*" onchange="uploadImage(this, 'st-cover', 'st-upload-status')" />
+                <button type="button" class="btn-upload" onclick="document.getElementById('st-cover-file').click()"><i class="fas fa-upload"></i></button>
             </div>
             <div id="st-upload-status" class="upload-status"></div>
-
-            <label>Setlist (Texto Longo)</label>
-            <textarea id="st-setlist" rows="10" placeholder="Cole a setlist aqui (M01... MC1...)" oninput="updateSetlistPreview()"></textarea>
+            <label>Setlist (Texto Longo)</label><textarea id="st-setlist" rows="10" placeholder="Cole a setlist aqui (M01... MC1...)" oninput="updateSetlistPreview()"></textarea>
             <div id="st-setlist-preview" class="setlist-preview">Pré-visualização...</div>
-
             <hr style="margin: 20px 0; border: 0; border-top: 2px dashed #ddd;">
-
             <h3>👥 Elencos (Casts)</h3>
             <div id="st-casts-list"></div>
             <button type="button" class="btn-ghost" onclick="openCastModal()">+ Adicionar Elenco (Team/Shonichi)</button>
-
             <button class="btn-main">Salvar Stage</button>
             <button type="button" class="btn-main" style="background:#f44336; border-color:#d32f2f; margin-top:10px;" onclick="deleteStage()">Excluir Stage</button>
           </form>
@@ -456,20 +217,10 @@
       <form onsubmit="saveMember(event)">
         <label>Nome</label><input id="m-name" required />
         <div style="display:flex; gap:10px;">
-          <div style="flex:1">
-              <label>Time</label>
-              <select id="m-team" class="team-select"></select>
-          </div>
+          <div style="flex:1"><label>Time</label><select id="m-team" class="team-select"></select></div>
           <div style="flex:1"><label>Geração</label><input type="number" id="m-gen" required placeholder="Ex: 1" /></div>
         </div>
-        <label>Status</label>
-        <select id="m-status-select">
-          <option value="Ativa">Ativa</option>
-          <option value="Graduada">Graduada</option>
-          <option value="Demitida">Demitida</option>
-          <option value="Expulsa">Expulsa</option>
-        </select>
-
+        <label>Status</label><select id="m-status-select"><option value="Ativa">Ativa</option><option value="Graduada">Graduada</option><option value="Demitida">Demitida</option><option value="Expulsa">Expulsa</option></select>
         <label>Foto</label>
         <div class="input-group">
           <input id="m-photo" placeholder="https://..." required />
@@ -477,7 +228,6 @@
           <button type="button" class="btn-upload" onclick="document.getElementById('m-photo-file').click()"><i class="fas fa-upload"></i></button>
         </div>
         <div id="m-upload-status" class="upload-status"></div>
-
         <label>Biografia</label><textarea id="m-bio" rows="4"></textarea>
         <button class="btn-main">Cadastrar</button>
       </form>
@@ -489,7 +239,6 @@
       <h2>✏️ Editar Membro</h2>
       <input type="text" id="manage-search" placeholder="🔍 Buscar..." oninput="renderManageSelect(this.value)" style="width:100%; margin-bottom:10px;" />
       <select id="manage-selector" onchange="fillEditForm()"><option value="">Selecione...</option></select>
-
       <div id="edit-form" style="display:none; margin-top:15px;">
         <img id="e-preview" src="" style="width:80px;height:80px;border-radius:50%; margin-bottom:10px; border:2px solid #000;" />
         <form onsubmit="updateMember(event)">
@@ -498,13 +247,7 @@
             <div style="flex:1"><label>Time</label><select id="e-team" class="team-select"></select></div>
             <div style="flex:1"><label>Geração</label><input type="number" id="e-gen" required /></div>
           </div>
-          <label>Status</label><select id="e-status-select">
-            <option value="Ativa">Ativa</option>
-            <option value="Graduada">Graduada</option>
-            <option value="Demitida">Demitida</option>
-            <option value="Expulsa">Expulsa</option>
-          </select>
-
+          <label>Status</label><select id="e-status-select"><option value="Ativa">Ativa</option><option value="Graduada">Graduada</option><option value="Demitida">Demitida</option><option value="Expulsa">Expulsa</option></select>
           <label>Foto</label>
           <div class="input-group">
             <input id="e-photo" required onchange="document.getElementById('e-preview').src=this.value" />
@@ -512,7 +255,6 @@
             <button type="button" class="btn-upload" onclick="document.getElementById('e-photo-file').click()"><i class="fas fa-upload"></i></button>
           </div>
           <div id="e-upload-status" class="upload-status"></div>
-
           <label>Bio</label><textarea id="e-bio" rows="4"></textarea>
           <button class="btn-main">Salvar Alterações</button>
         </form>
@@ -522,21 +264,13 @@
 
   <div id="cast-modal" class="modal-overlay">
       <div class="modal-box">
-          <div class="modal-header">
-              <h3>Editar Elenco</h3>
-              <button class="close-btn" onclick="closeCastModal()">×</button>
-          </div>
-          <label>Nome do Elenco (ex: Team Z)</label>
-          <input id="c-name" placeholder="Nome do time/elenco">
-          
+          <div class="modal-header"><h3>Editar Elenco</h3><button class="close-btn" onclick="closeCastModal()">×</button></div>
+          <label>Nome do Elenco (ex: Team Z)</label><input id="c-name" placeholder="Nome do time/elenco">
           <div style="margin-top:10px; padding:10px; background:#e3f2fd; border-radius:8px;">
-             <label style="margin-top:0; color:#1565c0; font-size:0.7rem;">⚡ Seleção Rápida de Time (Adicionar todos)</label>
-             <select id="cast-quick-team" class="team-select" style="margin-bottom:0;" onchange="quickSelectTeamForCast(this.value)">
-                 </select>
+             <label style="margin-top:0; color:#1565c0; font-size:0.7rem;">⚡ Seleção Rápida de Time</label>
+             <select id="cast-quick-team" class="team-select" style="margin-bottom:0;" onchange="quickSelectTeamForCast(this.value)"></select>
           </div>
-
-          <label>Selecionar Membros Individualmente</label>
-          <input type="text" id="cast-search" placeholder="Filtrar membros..." oninput="renderCastSelection(this.value)" style="margin-bottom:10px;">
+          <label>Selecionar Membros Individualmente</label><input type="text" id="cast-search" placeholder="Filtrar membros..." oninput="renderCastSelection(this.value)" style="margin-bottom:10px;">
           <div id="cast-selection-grid" class="selection-grid"></div>
           <button class="btn-main" onclick="saveCastToStage()">Confirmar Elenco</button>
       </div>
@@ -546,38 +280,21 @@
     <div class="builder-modal-header modal-header"><span style="font-weight:900;">Formação</span><button onclick="closeBuilder(true)">✕</button></div>
     <div id="step-1" style="padding:20px; display:block;">
       <label>Música</label><input id="b-song" placeholder="Nome da faixa" />
-      <label>Tipo</label>
-      <select id="b-kind" onchange="toggleKindRules()">
-        <option value="A-side">A-side</option>
-        <option value="B-side">B-side</option>
-        <option value="Undergirls">Undergirls</option>
-        <option value="Unit">Unit</option>
-        <option value="Solo">Solo</option>
-      </select>
+      <label>Tipo</label><select id="b-kind" onchange="toggleKindRules()"><option value="A-side">A-side</option><option value="B-side">B-side</option><option value="Undergirls">Undergirls</option><option value="Unit">Unit</option><option value="Solo">Solo</option></select>
       <div id="unit-fields" style="display:none;"><label>Nome Unit</label><input id="b-unit-name" /></div>
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:8px;">
         <div><label>Total</label><input type="number" id="b-total" value="16" min="1" oninput="syncRowsUI()" /></div>
         <div><label>Centers</label><input type="number" id="b-centers" value="1" min="0" oninput="syncRowsUI()" /></div>
       </div>
       <div id="manual-rows" class="rows-panel">
-        <label>Fileiras</label>
-        <select id="b-rowcount" onchange="renderRowInputs()">
-          <option value="1">1</option>
-          <option value="2">2</option>
-          <option value="3" selected>3</option>
-          <option value="4">4</option>
-        </select>
+        <label>Fileiras</label><select id="b-rowcount" onchange="renderRowInputs()"><option value="1">1</option><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option></select>
         <div id="row-inputs"></div>
         <div class="row-sum">Soma: <b id="rows-sum" style="color:#00b894;">16</b> / <b id="rows-total">16</b></div>
       </div>
-
       <div style="background: #fff3cd; padding: 10px; border-radius: 8px; margin-top: 15px; border: 1px solid #ffeeba;">
           <label style="margin-top:0; color:#856404;">✨ Auto-preencher (Música)</label>
-          <select id="b-auto-team" class="team-select" style="margin-bottom:0;">
-          </select>
-          <div style="font-size:0.7rem; color:#666; margin-top:4px;">Preenche as bolinhas automaticamente.</div>
+          <select id="b-auto-team" class="team-select" style="margin-bottom:0;"></select>
       </div>
-
       <button class="btn-main" onclick="startStage()">Montar</button>
     </div>
     <div id="step-2" class="builder-stage-area stage-area" style="display:none;">
@@ -605,716 +322,91 @@
   </div>
 
   <script>
-    // === ⚙️ CONFIGURAÇÃO DE TIMES (Fácil Alteração) ===
-    const TEAM_CONFIG = {
-        "Team Z": "Team Z",
-        "Team AII": "Team AII",
-        "Team P": "Team P",
-        "Team Kenkyuusei": "Team Kenkyuusei",
-        "Graduada": "Graduada"
-    };
-
-    // === SUPABASE ===
+    const TEAM_CONFIG = {"Team Z": "Team Z", "Team AII": "Team AII", "Team P": "Team P", "Team Kenkyuusei": "Team Kenkyuusei", "Graduada": "Graduada"};
     const SUPABASE_URL = 'https://iooyygtaosshxygnhlco.supabase.co';
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlvb3l5Z3Rhb3NzaHh5Z25obGNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkwMDEyNTUsImV4cCI6MjA4NDU3NzI1NX0.gfcVtNgn3g1gnFVrtaIqzkWxajYiV_KbtycYsE9OZ0Y";
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     const IMGBB_KEY = "81f7ca81cf22d739de576bd1dac7dcc2";
+    const T_MEMBERS="Membros"; const T_STAGES="Stages"; const T_STAGECASTS="Stagecasts"; const T_NEWS="Noticias"; const T_DISCO="Discografia";
 
-    // Tabelas
-    const T_MEMBERS = "Membros";
-    const T_STAGES = "Stages";
-    const T_STAGECASTS = "Stagecasts";
-    const T_NEWS = "Noticias";
-    const T_DISCO = "Discografia";
+    let allMembers=[], allStages=[], allDiscos=[], currentStageCasts=[], editingCastIndex=-1, tracksBuffer=[], builderIsEditMode=false, activeSlot=null, currentEditingDiscoId=null;
 
-    // Estado
-    let allMembers = [];
-    let allStages = [];
-    let allDiscos = [];
-    let currentStageCasts = [];
-    let editingCastIndex = -1;
-    let tracksBuffer = [];
-    let builderIsEditMode = false;
-    let activeSlot = null;
-    let currentEditingDiscoId = null;
+    async function init() { await loadMembers(); populateTeamSelects(); await loadStages(); await loadDiscos(); }
+    function populateTeamSelects() { document.querySelectorAll('.team-select').forEach(sel=>{ sel.innerHTML=(sel.id==='b-auto-team'||sel.id==='cast-quick-team')?'<option value="">Nenhum/Selecione...</option>':'<option value="">Selecione...</option>'; for(let k in TEAM_CONFIG) sel.innerHTML+=`<option value="${TEAM_CONFIG[k]}">${TEAM_CONFIG[k]}</option>`; }); }
+    function nav(id, el) { document.querySelectorAll('.section').forEach(s=>s.classList.remove('active')); document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active')); $('tab-'+id).classList.add('active'); if(el)el.classList.add('active'); const m=$('mobileMenu'); if(m.classList.contains('open')) toggleMenu(); }
+    function toggleMenu() { const m=$('mobileMenu'), o=document.querySelector('.mobile-menu-overlay'); if(m.classList.contains('open')){m.classList.remove('open');o.style.display='none';}else{m.classList.add('open');o.style.display='block';} }
+    function $(id){return document.getElementById(id);} function val(id){return $(id).value;} function showLoading(show){$('loading-overlay').style.display=show?'flex':'none';}
 
-    // === INICIALIZAÇÃO ===
-    async function init() {
-        await loadMembers(); // Load members first so teams work
-        populateTeamSelects();
-        await loadStages();
-        await loadDiscos();
-    }
+    // DB
+    async function loadMembers() { const {data}=await _supabase.from(T_MEMBERS).select('*').order('Nome'); allMembers=data||[]; renderManageSelect(); }
+    async function loadStages() { const {data}=await _supabase.from(T_STAGES).select('*').order('id',{ascending:false}); allStages=data||[]; const s=$('stage-selector'); s.innerHTML='<option value="">Selecione para editar...</option>'; allStages.forEach(st=>s.innerHTML+=`<option value="${st.id}">${st.Titulo}</option>`); }
+    async function loadDiscos() { const {data}=await _supabase.from(T_DISCO).select('*').order('Data',{ascending:false}); allDiscos=data||[]; const s=$('disco-selector'); s.innerHTML='<option value="">Selecione...</option>'; allDiscos.forEach(d=>s.innerHTML+=`<option value="${d.id}">${d.Titulo}</option>`); }
 
-    function populateTeamSelects() {
-        const selects = document.querySelectorAll('.team-select');
-        selects.forEach(sel => {
-            sel.innerHTML = '';
-            // Opção vazia
-            const emptyOpt = document.createElement('option');
-            emptyOpt.value = "";
-            emptyOpt.text = "Selecione...";
-            sel.appendChild(emptyOpt);
+    // STAGE LOGIC
+    function resetStageForm() { $('stage-form-container').style.display='block'; $('st-id').value=''; $('st-title').value=''; $('st-subtitle').value=''; $('st-date').value=''; $('st-cover').value=''; $('st-setlist').value=''; currentStageCasts=[]; updateSetlistPreview(); renderStageCasts(); $('stage-selector').value=""; }
+    async function fillStageForm() { const id=$('stage-selector').value; if(!id)return resetStageForm(); const s=allStages.find(x=>x.id==id); if(!s)return; $('stage-form-container').style.display='block'; $('st-id').value=s.id; $('st-title').value=s.Titulo; $('st-subtitle').value=s.Subtitulo||''; $('st-date').value=s.Estreia; $('st-status').value=s.Status; $('st-cover').value=s.Capa; $('st-setlist').value=s.Setlist||''; const {data}=await _supabase.from(T_STAGECASTS).select('*').eq('stage_id',id); currentStageCasts=data||[]; updateSetlistPreview(); renderStageCasts(); }
+    async function saveStage(e) { e.preventDefault(); showLoading(true); const id=$('st-id').value; const d={Titulo:$('st-title').value, Subtitulo:$('st-subtitle').value, Estreia:$('st-date').value, Status:$('st-status').value, Capa:$('st-cover').value, Setlist:$('st-setlist').value}; let sid=id;
+        if(id) await _supabase.from(T_STAGES).update(d).eq('id',id); else { const {data}=await _supabase.from(T_STAGES).insert(d).select(); sid=data[0].id; }
+        if(sid) { await _supabase.from(T_STAGECASTS).delete().eq('stage_id',sid); const casts=currentStageCasts.map(c=>({stage_id:sid, Nome:c.Nome, Membros:JSON.stringify(c.Membros)})); if(casts.length) await _supabase.from(T_STAGECASTS).insert(casts); }
+        await loadStages(); resetStageForm(); alert(id?"Atualizado!":"Criado!"); showLoading(false); }
+    async function deleteStage() { if(!confirm("Deletar?"))return; showLoading(true); const id=$('st-id').value; await _supabase.from(T_STAGECASTS).delete().eq('stage_id',id); await _supabase.from(T_STAGES).delete().eq('id',id); await loadStages(); resetStageForm(); alert("Deletado!"); showLoading(false); }
+    function updateSetlistPreview() { const txt=$('st-setlist').value; $('st-setlist-preview').innerHTML=txt.split('\n').map(l=>{l=l.trim(); if(l.match(/^M\d+/))return `<span class="setlist-m">${l}</span><br>`; if(l.match(/^MC\d+/))return `<span class="setlist-mc">${l}</span><br>`; if(l.toLowerCase().includes('encore'))return `<div class="setlist-header">${l}</div><br>`; return `<div>${l}</div>`;}).join(''); }
 
-            for (const [key, label] of Object.entries(TEAM_CONFIG)) {
-                const opt = document.createElement('option');
-                opt.value = label;
-                opt.text = label;
-                sel.appendChild(opt);
-            }
-        });
-    }
+    // CAST LOGIC
+    function renderStageCasts() { $('st-casts-list').innerHTML=currentStageCasts.map((c,i)=>`<div class="cast-item"><div class="cast-header"><span>${c.Nome}</span><div><button type="button" onclick="editCast(${i})" style="color:blue;border:none;background:none;cursor:pointer;">Edit</button><button type="button" onclick="currentStageCasts.splice(${i},1);renderStageCasts()" style="color:red;border:none;background:none;cursor:pointer;">X</button></div></div><div class="cast-members">${(typeof c.Membros==='string'?JSON.parse(c.Membros):c.Membros).map(m=>`<span class="cast-member-pill">${m.name}</span>`).join('')}</div></div>`).join(''); }
+    function openCastModal() { $('cast-modal').style.display='flex'; $('c-name').value=''; $('cast-quick-team').value=''; editingCastIndex=-1; renderCastSelection(); }
+    function editCast(i) { editingCastIndex=i; const c=currentStageCasts[i]; $('c-name').value=c.Nome; const ms=typeof c.Membros==='string'?JSON.parse(c.Membros):c.Membros; const s=new Set(ms.map(m=>m.id.toString())); $('cast-modal').style.display='flex'; renderCastSelection('',s); }
+    function closeCastModal() { $('cast-modal').style.display='none'; }
+    function renderCastSelection(q='', sel=new Set()) { const g=$('cast-selection-grid'); g.innerHTML=''; allMembers.filter(m=>['Ativa'].includes(m.Status) && (!q||m.Nome.toLowerCase().includes(q.toLowerCase()))).forEach(m=>{ const d=document.createElement('div'); d.className='select-item '+(sel.has(m.id.toString())?'selected':''); d.innerHTML=`<img src="${m.Foto}"><div>${m.Nome}</div><div>${m.Time}</div>`; d.dataset.id=m.id; d.dataset.name=m.Nome; d.dataset.gen=m.Geracao; d.dataset.team=m.Time; d.onclick=()=>{d.classList.toggle('selected');}; g.appendChild(d); }); }
+    function quickSelectTeamForCast(t) { if(!t)return; if(!$('c-name').value)$('c-name').value=t; document.querySelectorAll('#cast-selection-grid .select-item').forEach(d=>{if(d.dataset.team===t)d.classList.add('selected');}); }
+    function saveCastToStage() { const n=$('c-name').value; if(!n)return alert("Nome?"); const ms=[...document.querySelectorAll('.select-item.selected')].map(e=>({id:e.dataset.id,name:e.dataset.name,gen:e.dataset.gen,isCenter:false})); const d={Nome:n, Membros:ms}; if(editingCastIndex>=0){if(currentStageCasts[editingCastIndex].id)d.id=currentStageCasts[editingCastIndex].id; currentStageCasts[editingCastIndex]=d;}else currentStageCasts.push(d); closeCastModal(); renderStageCasts(); }
 
-    // === NAVEGAÇÃO ===
-    function nav(id, el) {
-        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        document.getElementById('tab-' + id).classList.add('active');
-        if(el) el.classList.add('active');
-        
-        // Mobile Menu Logic
-        const menu = document.getElementById('mobileMenu');
-        if (menu.classList.contains('open')) toggleMenu();
-    }
+    // UPLOAD
+    async function uploadImage(input, tid, sid) { const f=input.files[0]; if(!f)return; $(sid).innerText="⏳..."; try{const b64=await new Promise(r=>{const fr=new FileReader();fr.onload=()=>r(fr.result);fr.readAsDataURL(f)}); const fd=new FormData();fd.append("key",IMGBB_KEY);fd.append("image",String(b64).split(",")[1]); const r=await fetch("https://api.imgbb.com/1/upload",{method:"POST",body:fd}); const d=await r.json(); $(tid).value=d.data.url; $(sid).innerText="✅"; if(tid.includes('photo')||tid.includes('cover'))$('e-preview').src=d.data.url; }catch(e){$(sid).innerText="❌";} }
 
-    function toggleMenu() {
-        const menu = document.getElementById('mobileMenu');
-        const overlay = document.querySelector('.mobile-menu-overlay');
-        if (menu.classList.contains('open')) {
-            menu.classList.remove('open');
-            overlay.style.display = 'none';
-        } else {
-            menu.classList.add('open');
-            overlay.style.display = 'block';
-        }
-    }
+    // MEMBERS & DISCO
+    async function saveMember(e) { e.preventDefault(); showLoading(true); await _supabase.from(T_MEMBERS).insert({Nome:$('m-name').value, Time:$('m-team').value, Geracao:$('m-gen').value+'ª Geração', Status:$('m-status-select').value, Perfil:$('m-bio').value, Foto:$('m-photo').value}); await loadMembers(); $('m-name').value=''; alert("Salvo!"); showLoading(false); }
+    async function updateMember(e) { e.preventDefault(); showLoading(true); await _supabase.from(T_MEMBERS).update({Nome:$('e-name').value, Time:$('e-team').value, Geracao:$('e-gen').value+'ª Geração', Status:$('e-status-select').value, Perfil:$('e-bio').value, Foto:$('e-photo').value}).eq('id',$('manage-selector').value); await loadMembers(); alert("Atualizado!"); showLoading(false); }
+    function renderManageSelect(q='') { const s=$('manage-selector'); s.innerHTML='<option value="">Selecione...</option>'; allMembers.filter(m=>m.Nome.toLowerCase().includes(q.toLowerCase())).forEach(m=>s.innerHTML+=`<option value="${m.id}">${m.Nome}</option>`); }
+    function fillEditForm() { const m=allMembers.find(x=>x.id==$('manage-selector').value); if(!m){$('edit-form').style.display='none';return;} $('edit-form').style.display='block'; $('e-name').value=m.Nome; $('e-team').value=m.Time; $('e-gen').value=m.Geracao.replace(/\D/g,''); $('e-status-select').value=m.Status; $('e-photo').value=m.Foto; $('e-preview').src=m.Foto; $('e-bio').value=m.Perfil||''; }
+    async function saveDisco(e) { e.preventDefault(); if(!tracksBuffer.length)return alert("Músicas?"); showLoading(true); const h=buildHTML(); const c=tracksBuffer[0]?(tracksBuffer[0].members||[]).filter(m=>m.isCenter).map(m=>m.name).join('&'):''; await _supabase.from(T_DISCO).insert({Titulo:$('d-title').value, Tipo:$('d-type').value, Center:c, Data:$('d-date').value, Capa:$('d-cover').value, Tracklist:h}); await loadDiscos(); $('d-title').value=''; tracksBuffer=[]; updateTracks(false); alert("Salvo!"); showLoading(false); }
+    function fillDiscoEditForm() { const r=allDiscos.find(x=>x.id==$('disco-selector').value); if(!r){$('disco-edit-form').style.display='none';return;} currentEditingDiscoId=r.id; $('disco-edit-form').style.display='block'; $('ed-title').value=r.Titulo; $('ed-type').value=r.Tipo; $('ed-date').value=r.Data; $('ed-center').value=r.Center; $('ed-cover').value=r.Capa; tracksBuffer=parseHTMLToTracks(r.Tracklist||''); updateTracks(true); }
+    async function updateDisco(e) { e.preventDefault(); showLoading(true); const h=buildHTML(); const c=tracksBuffer[0]?(tracksBuffer[0].members||[]).filter(m=>m.isCenter).map(m=>m.name).join('&'):''; await _supabase.from(T_DISCO).update({Tipo:$('ed-type').value, Data:$('ed-date').value, Center:c, Capa:$('ed-cover').value, Tracklist:h}).eq('id',currentEditingDiscoId); await loadDiscos(); alert("Atualizado!"); showLoading(false); }
+    async function saveNews(e) { e.preventDefault(); showLoading(true); await _supabase.from(T_NEWS).insert({Titulo:$('n-title').value, Categoria:$('n-cat').value, Data:$('n-date').value, Texto:$('n-text').value}); $('n-title').value=''; alert("Salvo!"); showLoading(false); }
 
-    // === CARREGAMENTO DE DADOS ===
-    async function loadMembers() {
-        const { data, error } = await _supabase.from(T_MEMBERS).select('*').order('Nome');
-        if (error) console.error(error);
-        allMembers = data || [];
-        renderManageSelect();
-    }
-
-    async function loadStages() {
-        const { data, error } = await _supabase.from(T_STAGES).select('*').order('id', { ascending: false });
-        if (error) console.error(error);
-        allStages = data || [];
-        const sel = document.getElementById('stage-selector');
-        sel.innerHTML = '<option value="">Selecione para editar...</option>';
-        allStages.forEach(s => {
-            const opt = document.createElement('option');
-            opt.value = s.id;
-            opt.text = s.Titulo;
-            sel.appendChild(opt);
-        });
-    }
-    
-    async function loadDiscos() {
-        const { data, error } = await _supabase.from(T_DISCO).select('*').order('Data', { ascending: false });
-        if (error) console.error(error);
-        allDiscos = data || [];
-        const sel = document.getElementById('disco-selector');
-        sel.innerHTML = '<option value="">Selecione...</option>';
-        allDiscos.forEach(d => {
-            const opt = document.createElement('option');
-            opt.value = d.id;
-            opt.text = d.Titulo;
-            sel.appendChild(opt);
-        });
-    }
-
-    // === LÓGICA DE STAGE ===
-    function resetStageForm() {
-        document.getElementById('stage-form-container').style.display = 'block';
-        document.getElementById('st-id').value = '';
-        document.getElementById('st-title').value = '';
-        document.getElementById('st-subtitle').value = '';
-        document.getElementById('st-date').value = '';
-        document.getElementById('st-cover').value = '';
-        document.getElementById('st-setlist').value = '';
-        currentStageCasts = [];
-        updateSetlistPreview();
-        renderStageCasts();
-    }
-
-    async function fillStageForm() {
-        const id = document.getElementById('stage-selector').value;
-        if (!id) return resetStageForm();
-
-        const stage = allStages.find(s => s.id == id);
-        if (!stage) return;
-
-        document.getElementById('stage-form-container').style.display = 'block';
-        document.getElementById('st-id').value = stage.id;
-        document.getElementById('st-title').value = stage.Titulo;
-        document.getElementById('st-subtitle').value = stage.Subtitulo || '';
-        document.getElementById('st-date').value = stage.Estreia;
-        document.getElementById('st-status').value = stage.Status;
-        document.getElementById('st-cover').value = stage.Capa;
-        document.getElementById('st-setlist').value = stage.Setlist || '';
-        
-        const { data } = await _supabase.from(T_STAGECASTS).select('*').eq('stage_id', id);
-        currentStageCasts = data || [];
-        
-        updateSetlistPreview();
-        renderStageCasts();
-    }
-
-    function updateSetlistPreview() {
-        const text = document.getElementById('st-setlist').value;
-        const lines = text.split('\n');
-        let html = '';
-        lines.forEach(line => {
-            line = line.trim();
-            if (!line) return;
-            if (line.match(/^M\d+/)) {
-                html += `<span class="setlist-m">${line}</span><br>`;
-            } else if (line.match(/^MC\d+/)) {
-                html += `<span class="setlist-mc">${line}</span><br>`;
-            } else if (line.toLowerCase().includes('encore')) {
-                html += `<div class="setlist-header">${line}</div><br>`;
-            } else {
-                html += `<div>${line}</div>`;
-            }
-        });
-        document.getElementById('st-setlist-preview').innerHTML = html;
-    }
-
-    // === GERENCIAMENTO DE CAST (ELENCO) ===
-    function renderStageCasts() {
-        const div = document.getElementById('st-casts-list');
-        div.innerHTML = '';
-        currentStageCasts.forEach((cast, idx) => {
-            const members = typeof cast.Membros === 'string' ? JSON.parse(cast.Membros) : cast.Membros;
-            const pills = (members || []).map(m => `<span class="cast-member-pill">${m.name}</span>`).join('');
-            
-            div.innerHTML += `<br>
-                <div class="cast-item"><br>
-                    <div class="cast-header"><br>
-                        <span>${cast.Nome}</span><br>
-                        <div><br>
-                            <button type="button" style="color:blue; cursor:pointer; background:none; border:none;" onclick="editCast(${idx})">Editar</button><br>
-                            <button type="button" style="color:red; cursor:pointer; background:none; border:none;" onclick="removeCast(${idx})">X</button><br>
-                        </div><br>
-                    </div><br>
-                    <div class="cast-members">${pills}</div><br>
-                </div><br>
-            `;
-        });
-    }
-
-    function openCastModal() {
-        document.getElementById('cast-modal').style.display = 'flex';
-        document.getElementById('c-name').value = '';
-        document.getElementById('cast-quick-team').value = ""; // Reset quick team
-        editingCastIndex = -1;
-        renderCastSelection();
-    }
-
-    function editCast(idx) {
-        editingCastIndex = idx;
-        const cast = currentStageCasts[idx];
-        document.getElementById('c-name').value = cast.Nome;
-        const members = typeof cast.Membros === 'string' ? JSON.parse(cast.Membros) : cast.Membros;
-        const selectedIds = new Set(members.map(m => m.id.toString()));
-        document.getElementById('cast-modal').style.display = 'flex';
-        renderCastSelection('', selectedIds);
-    }
-
-    function closeCastModal() {
-        document.getElementById('cast-modal').style.display = 'none';
-    }
-
-    function renderCastSelection(filter = '', selectedSet = new Set()) {
-        const grid = document.getElementById('cast-selection-grid');
-        grid.innerHTML = '';
-        const q = filter.toLowerCase();
-        
-        allMembers.forEach(m => {
-            if (m.Status === 'Graduada' || m.Status === 'Demitida') return; 
-            if (q && !m.Nome.toLowerCase().includes(q)) return;
-
-            const div = document.createElement('div');
-            div.className = 'select-item ' + (selectedSet.has(m.id.toString()) ? 'selected' : '');
-            div.innerHTML = `<img src="${m.Foto}"><div style="font-size:0.6rem; font-weight:bold;">${m.Nome}</div><div>${m.Time}</div>`;
-            div.onclick = () => { div.classList.toggle('selected'); };
-            div.dataset.id = m.id;
-            div.dataset.name = m.Nome;
-            div.dataset.gen = m.Geracao;
-            div.dataset.team = m.Time; // For quick select
-            grid.appendChild(div);
-        });
-    }
-
-    // --- NOVA FUNÇÃO: QUICK SELECT TEAM FOR CAST ---
-    function quickSelectTeamForCast(teamName) {
-        if (!teamName) return;
-        
-        // Change name input if empty
-        const nameInput = document.getElementById('c-name');
-        if(!nameInput.value) nameInput.value = teamName;
-
-        const items = document.querySelectorAll('#cast-selection-grid .select-item');
-        items.forEach(item => {
-            if (item.dataset.team === teamName) {
-                if (!item.classList.contains('selected')) item.classList.add('selected');
-            }
-        });
-    }
-
-    function saveCastToStage() {
-        const name = document.getElementById('c-name').value;
-        if (!name) return alert("Nome do elenco obrigatório");
-
-        const selectedEls = document.querySelectorAll('.select-item.selected');
-        const members = Array.from(selectedEls).map(el => ({
-            id: el.dataset.id,
-            name: el.dataset.name,
-            gen: el.dataset.gen,
-            isCenter: false 
-        }));
-
-        const castData = { Nome: name, Membros: members };
-
-        if (editingCastIndex >= 0) {
-            if (currentStageCasts[editingCastIndex].id) castData.id = currentStageCasts[editingCastIndex].id;
-            currentStageCasts[editingCastIndex] = castData;
-        } else {
-            currentStageCasts.push(castData);
-        }
-
-        closeCastModal();
-        renderStageCasts();
-    }
-
-    function removeCast(idx) {
-        if (!confirm("Remover este elenco?")) return;
-        currentStageCasts.splice(idx, 1);
-        renderStageCasts();
-    }
-
-    // === SALVAR STAGE ===
-    async function saveStage(e) {
-        e.preventDefault();
-        const id = document.getElementById('st-id').value;
-        const stageData = {
-            Titulo: document.getElementById('st-title').value,
-            Subtitulo: document.getElementById('st-subtitle').value,
-            Estreia: document.getElementById('st-date').value,
-            Status: document.getElementById('st-status').value,
-            Capa: document.getElementById('st-cover').value,
-            Setlist: document.getElementById('st-setlist').value
-        };
-
-        showLoading(true);
-        try {
-            let stageId = id;
-            if (id) {
-                const { error } = await _supabase.from(T_STAGES).update(stageData).eq('id', id);
-                if (error) throw error;
-            } else {
-                const { data, error } = await _supabase.from(T_STAGES).insert(stageData).select();
-                if (error) throw error;
-                stageId = data[0].id;
-            }
-
-            if (stageId) {
-                await _supabase.from(T_STAGECASTS).delete().eq('stage_id', stageId);
-                const castsToInsert = currentStageCasts.map(c => ({
-                    stage_id: stageId,
-                    Nome: c.Nome,
-                    Membros: JSON.stringify(c.Membros)
-                }));
-                
-                if (castsToInsert.length > 0) {
-                    const { error: castErr } = await _supabase.from(T_STAGECASTS).insert(castsToInsert);
-                    if (castErr) throw castErr;
-                }
-            }
-
-            alert("Stage salvo com sucesso!");
-            location.reload();
-
-        } catch (err) {
-            console.error(err);
-            alert("Erro ao salvar: " + err.message);
-        } finally {
-            showLoading(false);
-        }
-    }
-    
-    async function deleteStage() {
-        const id = document.getElementById('st-id').value;
-        if (!id) return;
-        if (!confirm("Tem certeza?")) return;
-
-        showLoading(true);
-        try {
-            await _supabase.from(T_STAGECASTS).delete().eq('stage_id', id);
-            await _supabase.from(T_STAGES).delete().eq('id', id);
-            alert("Stage deletado.");
-            location.reload();
-        } catch (err) {
-            alert("Erro: " + err.message);
-        } finally {
-            showLoading(false);
-        }
-    }
-
-    // === MEMBROS ===
-    async function saveMember(e) {
-        e.preventDefault();
-        const data = {
-            Nome: document.getElementById('m-name').value,
-            Time: document.getElementById('m-team').value,
-            Geracao: document.getElementById('m-gen').value + 'ª Geração',
-            Status: document.getElementById('m-status-select').value,
-            Perfil: document.getElementById('m-bio').value,
-            Foto: document.getElementById('m-photo').value
-        };
-        const { error } = await _supabase.from(T_MEMBERS).insert(data);
-        if (error) alert(error.message); else { alert("Cadastrado!"); location.reload(); }
-    }
-
-    async function updateMember(e) {
-        e.preventDefault();
-        const id = document.getElementById('manage-selector').value;
-        if (!id) return;
-        const data = {
-            Nome: document.getElementById('e-name').value,
-            Time: document.getElementById('e-team').value,
-            Geracao: document.getElementById('e-gen').value + 'ª Geração',
-            Status: document.getElementById('e-status-select').value,
-            Perfil: document.getElementById('e-bio').value,
-            Foto: document.getElementById('e-photo').value
-        };
-        const { error } = await _supabase.from(T_MEMBERS).update(data).eq('id', id);
-        if (error) alert(error.message); else { alert("Atualizado!"); location.reload(); }
-    }
-
-    function renderManageSelect(q = '') {
-        const sel = document.getElementById('manage-selector');
-        sel.innerHTML = '<option value="">Selecione...</option>';
-        allMembers.filter(m => m.Nome.toLowerCase().includes(q.toLowerCase())).forEach(m => {
-            const opt = document.createElement('option');
-            opt.value = m.id;
-            opt.text = m.Nome;
-            sel.appendChild(opt);
-        });
-    }
-
-    function fillEditForm() {
-        const id = document.getElementById('manage-selector').value;
-        const member = allMembers.find(m => m.id == id);
-        if (!member) { document.getElementById('edit-form').style.display='none'; return; }
-        
-        document.getElementById('edit-form').style.display='block';
-        document.getElementById('e-name').value = member.Nome;
-        document.getElementById('e-team').value = member.Time;
-        document.getElementById('e-gen').value = member.Geracao.replace(/\D/g,'');
-        document.getElementById('e-status-select').value = member.Status;
-        document.getElementById('e-photo').value = member.Foto;
-        document.getElementById('e-preview').src = member.Foto;
-        document.getElementById('e-bio').value = member.Perfil || '';
-    }
-
-    // === NEWS ===
-    async function saveNews(e) {
-      e.preventDefault();
-      showLoading(true, "Publicando...");
-      try {
-        const { error } = await _supabase.from(T_NEWS).insert({
-          Titulo: val('n-title'),
-          Categoria: val('n-cat'),
-          Data: val('n-date'),
-          Texto: val('n-text')
-        });
-        if (error) throw error;
-        alert("Notícia publicada!");
-        location.reload();
-      } catch (err) {
-        console.error(err);
-        showLoading(false);
-        alert("Erro: " + err.message);
-      }
-    }
-
-    // === DISCOGRAFIA (Add/Edit) ===
-    async function saveDisco(e) {
-      e.preventDefault();
-      if (!tracksBuffer.length) return alert("Adicione músicas!");
-      showLoading(true, "Salvando...");
-      try {
-        const html = buildHTML();
-        const centerStr = tracksBuffer[0] ? (tracksBuffer[0].members || []).filter(m => m.isCenter).map(m => m.name).join(' & ') : '';
-        const { data, error } = await _supabase.from(T_DISCO).insert({
-          Titulo: val('d-title'),
-          Tipo: val('d-type'),
-          Center: centerStr || val('d-center'),
-          Data: val('d-date'),
-          Capa: val('d-cover'),
-          Tracklist: html
-        }).select();
-        if (error) throw error;
-        alert("Sucesso!");
-        location.reload();
-      } catch (err) {
-        console.error(err);
-        showLoading(false);
-        alert("Erro: " + err.message);
-      }
-    }
-
-    function fillDiscoEditForm() {
-      const id = $('disco-selector')?.value;
-      const box = $('disco-edit-form');
-      if (!id) { box.style.display = 'none'; currentEditingDiscoId = null; return; }
-      currentEditingDiscoId = id;
-      const rec = allDiscos.find(r => r.id == id);
-      if (!rec) return;
-      const f = rec.fields;
-      $('ed-title').value = f.Titulo || '';
-      $('ed-type').value = f.Tipo || 'Single';
-      $('ed-date').value = (f.Data || '').slice(0, 10);
-      $('ed-center').value = f.Center || '';
-      $('ed-cover').value = f.Capa || '';
-      const oldHTML = f.Tracklist || '';
-      tracksBuffer = parseHTMLToTracks(oldHTML);
-      updateTracks(true);
-      box.style.display = 'block';
-    }
-
-    async function updateDisco(e) {
-      e.preventDefault();
-      const id = currentEditingDiscoId;
-      if (!id) return;
-      showLoading(true, "Atualizando...");
-      try {
-        const html = buildHTML();
-        const centerStr = tracksBuffer[0] ? (tracksBuffer[0].members || []).filter(m => m.isCenter).map(m => m.name).join(' & ') : '';
-        const { error } = await _supabase.from(T_DISCO).update({
-          Tipo: val('ed-type'),
-          Data: val('ed-date'),
-          Center: centerStr,
-          Capa: val('ed-cover'),
-          Tracklist: html
-        }).eq('id', id);
-        if (error) throw error;
-        alert("Atualizado!");
-        location.reload();
-      } catch (err) {
-        console.error(err);
-        showLoading(false);
-        alert("Erro: " + err.message);
-      }
-    }
-
-    // === IMG UPLOAD ===
-    async function uploadImage(input, targetId, statusId) {
-      const file = input.files[0];
-      if (!file) return;
-      const statusEl = $(statusId);
-      const targetEl = $(targetId);
-      statusEl.innerText = "⏳ Enviando...";
-      try {
-        const base64 = await new Promise((r, j) => {
-          const fr = new FileReader();
-          fr.onload = () => r(fr.result);
-          fr.onerror = j;
-          fr.readAsDataURL(file);
-        });
-        const form = new URLSearchParams();
-        form.append("key", IMGBB_KEY);
-        form.append("image", String(base64).split(",")[1]);
-        const res = await fetch("https://api.imgbb.com/1/upload", { method: "POST", body: form });
-        const data = await res.json();
-        if (!data?.success) throw new Error("Erro upload");
-        targetEl.value = data.data.url;
-        statusEl.innerText = "✅ Ok!";
-        if (targetId === 'e-photo') $('e-preview').src = data.data.url;
-      } catch (e) {
-        console.error(e);
-        statusEl.innerText = "❌ Erro";
-      }
-    }
-
-    // === BUILDER (Formação) ===
-    function openBuilder(isEdit) {
-      builderIsEditMode = !!isEdit;
-      $('builder-modal').style.display = 'flex';
-      $('builder-modal').classList.add('active');
-      $('step-1').style.display = 'block';
-      $('step-2').style.display = 'none';
-      if (!$('row-inputs').children.length) renderRowInputs();
-      $('b-song').value = '';
-      $('b-unit-name').value = '';
-      document.getElementById('b-auto-team').value = ""; // Reset auto team
-      toggleKindRules();
-      syncRowsUI();
-    }
-
-    function closeBuilder() { $('builder-modal').classList.remove('active'); $('builder-modal').style.display = 'none'; }
+    // BUILDER
+    function openBuilder(isE) { builderIsEditMode=isE; $('builder-modal').style.display='flex'; $('step-1').style.display='block'; $('step-2').style.display='none'; if(!$('row-inputs').children.length)renderRowInputs(); $('b-song').value=''; $('b-auto-team').value=''; syncRowsUI(); }
+    function closeBuilder() { $('builder-modal').style.display='none'; }
     function backToFormationMenu() { $('step-2').style.display='none'; $('step-1').style.display='block'; }
     function syncRowsUI() { $('rows-total').innerText = parseInt(val('b-total'))||0; updateRowsSum(); }
-    
-    function renderRowInputs() {
-        const w=$('row-inputs'), c=parseInt(val('b-rowcount'))||3, old=[...w.querySelectorAll('.row-count-input')].map(i=>parseInt(i.value)||0);
-        w.innerHTML='';
-        for(let i=0;i<c;i++) w.innerHTML+=`<div class="rowline"><div class="row-tag">${i===0?'Frente':(i===c-1?'Fundo':`Meio ${i}`)}</div><input type="number" min="0" class="row-count-input" value="${old[i]||0}" oninput="updateRowsSum()"></div>`;
-        updateRowsSum();
-    }
-    
+    function renderRowInputs() { const w=$('row-inputs'), c=parseInt(val('b-rowcount'))||3; w.innerHTML=''; for(let i=0;i<c;i++) w.innerHTML+=`<div class="rowline"><div class="row-tag">${i===0?'Frente':(i===c-1?'Fundo':`Meio ${i}`)}</div><input type="number" min="0" class="row-count-input" value="0" oninput="updateRowsSum()"></div>`; updateRowsSum(); }
     function updateRowsSum() { const s=[...document.querySelectorAll('.row-count-input')].reduce((a,b)=>a+(parseInt(b.value)||0),0); $('rows-sum').innerText=s; $('rows-sum').style.color=(s===(parseInt(val('b-total'))||0))?'#00b894':'#e91e63'; }
-    function toggleKindRules() { const k=val('b-kind'); $('unit-fields').style.display=(k==='Unit')?'block':'none'; if(k==='Solo'){ $('b-total').value=1; $('b-centers').value=1; $('b-rowcount').value=1; renderRowInputs(); document.querySelector('.row-count-input').value=1; syncRowsUI(); } }
-
+    function toggleKindRules() { const k=val('b-kind'); $('unit-fields').style.display=(k==='Unit')?'block':'none'; }
     function startStage() {
-        const t = parseInt(val('b-total')) || 0;
-        const inps = [...document.querySelectorAll('.row-count-input')].map(i => parseInt(i.value) || 0);
-        
-        if (inps.reduce((a, b) => a + b, 0) !== t) return alert("Soma incorreta.");
-        
-        const c = parseInt(val('b-centers')) || 0;
-        const f = inps[0] || 0; 
-        let ci = [];
-        if (c > 0 && f > 0) { 
-            const s = Math.floor((f - c) / 2); 
-            for (let k = 0; k < c; k++) ci.push(s + k); 
-        }
-
-        // --- AUTO-PREENCHIMENTO (BUILDER) ---
-        const autoTeam = document.getElementById('b-auto-team').value;
-        let membersToFill = [];
-        
-        if (autoTeam && autoTeam !== "") {
-            membersToFill = allMembers.filter(m => 
-                m.Time === autoTeam && 
-                ['Ativa'].includes(m.Status)
-            );
-        }
-        let fillIndex = 0;
-        // -------------------------
-
-        $('slots').innerHTML = ''; 
-        const rw = document.createElement('div'); 
-        rw.className = 'rows-wrap'; 
-
-        // Visual: Fundo (length-1) no topo, Frente (0) embaixo
-        for (let r = inps.length - 1; r >= 0; r--) {
-            const rd = document.createElement('div'); 
-            rd.className = 'slots-row'; 
-            const isFront = (r === 0);
-
-            // Numeração: Frente (0) começa em 1
-            let startBadge = 1;
-            for(let k = 0; k < r; k++) {
-                startBadge += inps[k];
-            }
-
-            for (let j = 0; j < inps[r]; j++) {
-                const d = document.createElement('div'); 
-                d.className = 'slot'; 
-                
-                if (isFront && ci.includes(j)) d.classList.add('is-center');
-                
-                // Verifica se deve auto-preencher
-                let assignedMember = null;
-                let innerContent = '';
-
-                if (autoTeam && fillIndex < membersToFill.length) {
-                    assignedMember = membersToFill[fillIndex];
-                    fillIndex++;
-                    const p = assignedMember.Foto || 'https://placehold.co/100?text=?';
-                    innerContent = `
-                        <div class="slot-badge">${startBadge + j}</div>
-                        <div class="slot-circle"><img src="${p}" onerror="this.src='https://placehold.co/100?text=?'"></div>
-                        <div class="slot-name">${assignedMember.Nome}</div>
-                    `;
-                } else {
-                    innerContent = `
-                        <div class="slot-badge">${startBadge + j}</div>
-                        <div class="slot-circle"><i class="fas fa-plus" style="color:#ddd"></i></div>
-                        <div class="slot-name">-</div>
-                    `;
-                }
-                
-                d.innerHTML = innerContent;
-
-                if (assignedMember) {
-                    d.dataset.id = assignedMember.id;
-                    d.dataset.name = assignedMember.Nome;
-                    d.dataset.gen = assignedMember.Geracao;
-                }
-
-                d.onclick = () => openMemberModalForBuilder(d); 
-                rd.appendChild(d);
-            }
-            rw.appendChild(rd);
-        }
-        
-        $('slots').appendChild(rw); 
-        $('step-1').style.display = 'none'; 
-        $('step-2').style.display = 'block';
+        const t=parseInt(val('b-total'))||0, inps=[...document.querySelectorAll('.row-count-input')].map(i=>parseInt(i.value)||0); if(inps.reduce((a,b)=>a+b,0)!==t) return alert("Soma incorreta.");
+        const c=parseInt(val('b-centers'))||0, auto=$('b-auto-team').value; let ci=[], fillM=[];
+        if(c>0&&inps[0]>0){ const s=Math.floor((inps[0]-c)/2); for(let k=0;k<c;k++) ci.push(s+k); }
+        if(auto) fillM=allMembers.filter(m=>m.Time===auto&&['Ativa'].includes(m.Status)); let fIdx=0;
+        $('slots').innerHTML=''; const rw=document.createElement('div'); rw.className='rows-wrap';
+        for(let r=inps.length-1;r>=0;r--){
+            const rd=document.createElement('div'); rd.className='slots-row'; const isF=(r===0); let sb=1; for(let k=0;k<r;k++)sb+=inps[k];
+            for(let j=0;j<inps[r];j++){
+                const d=document.createElement('div'); d.className='slot'; if(isF&&ci.includes(j))d.classList.add('is-center');
+                let h=`<div class="slot-badge">${sb+j}</div><div class="slot-circle"><i class="fas fa-plus" style="color:#ddd"></i></div><div class="slot-name">-</div>`;
+                let mem=null; if(auto&&fIdx<fillM.length){ mem=fillM[fIdx++]; h=`<div class="slot-badge">${sb+j}</div><div class="slot-circle"><img src="${mem.Foto||'https://placehold.co/100'}"></div><div class="slot-name">${mem.Nome}</div>`; }
+                d.innerHTML=h; if(mem){ d.dataset.id=mem.id; d.dataset.name=mem.Nome; d.dataset.gen=mem.Geracao; } d.onclick=()=>openMemberModalForBuilder(d); rd.appendChild(d);
+            } rw.appendChild(rd);
+        } $('slots').appendChild(rw); $('step-1').style.display='none'; $('step-2').style.display='block';
     }
-
-    function openMemberModalForBuilder(el) { activeSlot=el; $('member-select-modal').style.display='flex'; $('member-search').value=''; renderMemberSelectionList(''); }
+    function openMemberModalForBuilder(el) { activeSlot=el; $('member-select-modal').style.display='flex'; renderMemberSelectionList(''); }
     function closeMemberModal() { $('member-select-modal').style.display='none'; activeSlot=null; }
-    function selectMember(m) { if(!activeSlot)return; const p=m.Foto||'https://placehold.co/100?text=?'; activeSlot.querySelector('.slot-circle').innerHTML=`<img src="${p}" onerror="this.src='https://placehold.co/100?text=?'">`; activeSlot.querySelector('.slot-name').innerText=m.Nome; activeSlot.dataset.id=m.id; activeSlot.dataset.name=m.Nome; activeSlot.dataset.gen=m.Geracao||''; closeMemberModal(); }
-    function clearSlot() { if(activeSlot){ activeSlot.querySelector('.slot-circle').innerHTML='<i class="fas fa-plus" style="color:#ddd"></i>'; activeSlot.querySelector('.slot-name').innerText='-'; delete activeSlot.dataset.id; delete activeSlot.dataset.name; delete activeSlot.dataset.gen; } closeMemberModal(); }
-    
-    function finishTrack() {
-        const n=val('b-song').trim(); if(!n) return alert("Nome?");
-        const s=[...document.querySelectorAll('.slot')].filter(el=>el.dataset.id); if(!s.length) return alert("Selecione membros.");
-        const m=s.map(el=>({ id:el.dataset.id, name:el.dataset.name, gen:el.dataset.gen||'', isCenter:el.classList.contains('is-center') }));
-        tracksBuffer.push({ name:n, kind:val('b-kind'), unitName:val('b-unit-name'), members:m, html:null });
-        updateTracks(builderIsEditMode); closeBuilder(true);
-    }
-
-    function updateTracks(isEdit) { 
-        const c=$(isEdit?'ed-tracks-list':'tracks-list'); 
-        c.innerHTML=tracksBuffer.length?'':'<div style="text-align:center;color:#999;font-size:.85rem;">Vazio</div>'; 
-        tracksBuffer.forEach((t,i)=>{ c.innerHTML+=`<div class="track-item"><div class="track-info"><b>${t.name}</b> <span class="badge">${t.kind}</span></div><div class="track-actions"><button type="button" class="btn-icon delete" onclick="removeTrack(${i},${isEdit})">✕</button></div></div>`; }); 
-    }
-    
-    function removeTrack(i, isEdit) { tracksBuffer.splice(i, 1); updateTracks(isEdit); }
-
-    // --- HTML GENERATORS ---
-    function buildHTML() {
-      let html = `<div class="modal-nav"><button class="modal-nav-btn active" data-section="tracklist">Tracklist</button><button class="modal-nav-btn" data-section="formacao">Formação</button></div><div class="details-content"><div class="modal-section active" data-section="tracklist"><ol class="tracklist">`;
-      let forms = `<div class="modal-section" data-section="formacao">`;
-      tracksBuffer.forEach((t, index) => {
-        const kindClass = normalizeKind(t.kind);
-        const unitTxt = (String(t.unitName || '').trim()) ? ` • ${t.unitName}` : '';
-        html += `<li><a>${t.name}</a> <span class="label ${kindClass}">${t.kind}${unitTxt}</span></li>`;
-        forms += `<div class="formation-group"><div class="formation-title">${(String(t.kind) === 'Unit') ? '<i class="fas fa-users"></i>' : ''} ${t.name}</div><div class="member-grid">`;
-        (t.members || []).forEach(mem => {
-          let full = allMembers.find(am => am.id == mem.id);
-          if (!full && mem.name) full = allMembers.find(am => am.Nome === mem.name);
-          const centerClass = mem.isCenter ? 'is-center' : '';
-          const photo = full?.Foto || 'https://placehold.co/300?text=?';
-          const name = full?.Nome || mem.name || '???';
-          const genTxt = formatGen(full?.Geracao || mem.gen || '');
-          if (full) mem.id = full.id;
-          forms += `<a class="member-card-static ${centerClass}" data-id="${mem.id || ''}"><div class="member-photo"><img src="${photo}" loading="lazy"></div><div class="member-info"><h3>${name}</h3><p>${genTxt || ''}</p></div></a>`;
-        });
-        forms += `</div></div>`;
-        if (index < tracksBuffer.length - 1) forms += `<hr class="formation-separator"/>`;
-      });
-      forms += `</div></div>`;
-      const hiddenData = `<div id="ctl48-formation-data" style="display:none;">${JSON.stringify(tracksBuffer)}</div>`;
-      return html + `</ol></div>` + forms + hiddenData + `</div>`;
-    }
-
-    function normalizeKind(k) { const s=String(k||'').trim().toLowerCase(); if(s.includes('a-side'))return 'a-side'; if(s.includes('under'))return 'undergirls'; if(s.includes('unit'))return 'unit'; if(s.includes('solo'))return 'solo'; return 'b-side'; }
-    function formatGen(g) { const n=g?String(g).replace(/\D/g,''):''; return n?`${n}ª Gen`:''; }
-    function parseHTMLToTracks(h) { if(!h)return[]; const t=document.createElement('div'); t.innerHTML=h; const el=t.querySelector('#ctl48-formation-data'); if(el){ try{return JSON.parse(el.innerText).map(x=>({...x,html:null}));}catch(e){} } return []; }
-
-    // Helpers
-    function $(id) { return document.getElementById(id); }
-    function val(id) { const el = $(id); return el ? el.value : ""; }
-    function showLoading(show) { document.getElementById('loading-overlay').style.display = show ? 'flex' : 'none'; }
-    function setLoadingLog(m) {}
+    function selectMember(m) { if(!activeSlot)return; activeSlot.querySelector('.slot-circle').innerHTML=`<img src="${m.Foto}">`; activeSlot.querySelector('.slot-name').innerText=m.Nome; activeSlot.dataset.id=m.id; activeSlot.dataset.name=m.Nome; activeSlot.dataset.gen=m.Geracao; closeMemberModal(); }
+    function clearSlot() { if(activeSlot){activeSlot.querySelector('.slot-circle').innerHTML='<i class="fas fa-plus"></i>';activeSlot.querySelector('.slot-name').innerText='-';delete activeSlot.dataset.id;} closeMemberModal(); }
+    function finishTrack() { const n=val('b-song').trim(); if(!n)return alert("Nome?"); const s=[...document.querySelectorAll('.slot')].filter(e=>e.dataset.id).map(e=>({id:e.dataset.id,name:e.dataset.name,gen:e.dataset.gen,isCenter:e.classList.contains('is-center')})); if(!s.length)return alert("Vazio?"); tracksBuffer.push({name:n,kind:val('b-kind'),unitName:val('b-unit-name'),members:s,html:null}); updateTracks(builderIsEditMode); closeBuilder(); }
+    function updateTracks(isE) { const c=$(isE?'ed-tracks-list':'tracks-list'); c.innerHTML=tracksBuffer.map((t,i)=>`<div class="track-item"><div class="track-info"><b>${t.name}</b> <span class="badge">${t.kind}</span></div><div class="track-actions"><button type="button" class="btn-icon delete" onclick="tracksBuffer.splice(${i},1);updateTracks(${isE})">✕</button></div></div>`).join('')||'<div style="text-align:center;color:#999;">Vazio</div>'; }
+    function buildHTML() { let h=`<div class="modal-nav"><button class="modal-nav-btn active">Tracklist</button></div><div class="details-content"><ol class="tracklist">`, f=`<div class="modal-section">`; tracksBuffer.forEach(t=>{ h+=`<li><a>${t.name}</a> <span class="label ${normalizeKind(t.kind)}">${t.kind}</span></li>`; f+=`<div class="formation-group"><div class="formation-title">${t.name}</div><div class="member-grid">`+(t.members||[]).map(m=>`<a class="member-card-static ${m.isCenter?'is-center':''}"><div class="member-photo"><img src="${allMembers.find(am=>am.id==m.id)?.Foto||'https://placehold.co/100'}"></div><div class="member-info"><h3>${m.name}</h3><p>${m.gen}</p></div></a>`).join('')+`</div></div><hr>`; }); return h+`</ol></div>`+f+`</div><div id="ctl48-formation-data" style="display:none;">${JSON.stringify(tracksBuffer)}</div>`; }
+    function normalizeKind(k){const s=(k||'').toLowerCase(); return s.includes('a-side')?'a-side':s.includes('under')?'undergirls':s.includes('unit')?'unit':'b-side';}
+    function parseHTMLToTracks(h){const d=document.createElement('div');d.innerHTML=h;const e=d.querySelector('#ctl48-formation-data');return e?JSON.parse(e.innerText):[];}
 
     init();
   </script>
