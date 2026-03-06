@@ -1,414 +1,145 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>ZAP48 Admin (Stages Ultimate)</title>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet" />
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
-  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ZAP48 - Formulário de Registro</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <style>
-    :root { --primary: #8ACE00; --secondary: #000000; --bg: #f4f6f8; --mc-bg: #f0f0f0; --music-color: #e91e63; }
-    body { background: var(--bg); margin: 0; padding-bottom: 100px; font-family: 'Roboto', sans-serif; color: #333; }
-    .header { background: #000; padding: 15px; text-align: center; color: var(--primary); font-weight: 900; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 10px rgba(0,0,0,.1); font-size: 1.2rem; text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between; align-items: center; }
-    .menu-toggle { display: none; background: none; border: none; color: var(--primary); font-size: 1.5rem; cursor: pointer; }
-    .section { display: none; padding: 15px; animation: fadeIn .25s; }
-    .section.active { display: block; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    .card { background: #fff; padding: 20px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 10px rgba(0,0,0,.05); border: 1px solid #eee; }
-    h2 { margin-top: 0; color: #000; font-weight: 900; }
-    label { display: block; font-size: .75rem; font-weight: 900; color: #666; margin-top: 14px; margin-bottom: 6px; text-transform: uppercase; letter-spacing: .5px; }
-    input, select, textarea { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; background: #fff; font-size: 1rem; transition: .2s; color: #333; font-family: inherit; font-weight: 500; box-sizing: border-box; }
-    input:focus, select:focus, textarea:focus { border-color: var(--primary); outline: none; }
-    textarea { resize: vertical; }
-    .btn-main { width: 100%; padding: 15px; background: var(--primary); color: #000; border: 2px solid #000; border-radius: 8px; font-weight: 900; margin-top: 16px; font-size: 1rem; cursor: pointer; text-transform: uppercase; box-shadow: 4px 4px 0 #000; transition: transform 0.1s; }
-    .btn-main:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 #000; }
-    .btn-ghost { width: 100%; padding: 12px; border-radius: 8px; font-weight: 900; border: 2px solid #ddd; background: #fff; color: #555; cursor: pointer; text-transform: uppercase; font-size: 0.8rem; }
-    .input-group { display: flex; gap: 8px; align-items: center; margin-top: 5px; }
-    .btn-upload { background: #333; color: #fff; border: none; padding: 12px 15px; border-radius: 8px; cursor: pointer; }
-    .upload-status { font-size: .78rem; color: var(--primary); margin-top: 6px; font-weight: 900; min-height: 15px; }
-    .bottom-nav { position: fixed; bottom: 0; width: 100%; height: 70px; background: #000; display: flex; border-top: 4px solid var(--primary); z-index: 1000; }
-    .nav-item { flex: 1; border: none; background: none; color: #666; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: .65rem; font-weight: 900; cursor: pointer; text-transform: uppercase; }
-    .nav-item.active { color: var(--primary); }
-    .nav-item i { font-size: 1.4rem; margin-bottom: 4px; }
-    .mobile-menu-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1001; display: none; }
-    .mobile-menu { position: fixed; top: 0; left: -280px; width: 280px; height: 100%; background: #fff; z-index: 1002; transition: left 0.3s ease; padding-top: 60px; box-shadow: 2px 0 10px rgba(0,0,0,0.2); }
-    .mobile-menu.open { left: 0; }
-    .mobile-menu-item { display: block; padding: 15px 20px; color: #333; text-decoration: none; font-weight: 700; border-bottom: 1px solid #eee; cursor: pointer; display: flex; align-items: center; gap: 10px; }
-    .mobile-menu-item.active { background-color: #f0f0f0; color: #000; border-left: 5px solid var(--primary); }
-    .mobile-menu-close { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #000; }
-    @media (max-width: 768px) { .bottom-nav { display: none; } .menu-toggle { display: block; } body { padding-bottom: 0; } }
-    #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, .95); z-index: 5000; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-    .spinner { border: 5px solid #f3f3f3; border-top: 5px solid var(--primary); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 20px; }
-    @keyframes spin { 0% { transform: rotate(0) } 100% { transform: rotate(360deg) } }
-    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: none; flex-direction: column; overflow-y: auto; }
-    .modal-overlay.active { display: flex; }
-    .modal-box { background: #fff; width: 95%; max-width: 600px; margin: auto; border-radius: 12px; padding: 20px; box-sizing: border-box; position: relative; }
-    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
-    .modal-header h3 { margin: 0; text-transform: uppercase; }
-    .close-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; font-weight: bold; }
-    .setlist-preview { background: #fafafa; border: 2px dashed #ddd; padding: 15px; border-radius: 8px; margin-top: 10px; max-height: 300px; overflow-y: auto; font-size: 0.9rem; }
-    .setlist-m { color: var(--music-color); font-weight: 700; margin-bottom: 4px; display: block; }
-    .setlist-mc { background: var(--mc-bg); color: #333; font-weight: 900; font-style: italic; padding: 4px 8px; border-radius: 4px; display: inline-block; margin: 8px 0; font-size: 0.8rem; }
-    .setlist-header { font-size: 1.1rem; font-weight: 900; text-transform: uppercase; border-bottom: 3px solid var(--primary); display: inline-block; margin-top: 15px; margin-bottom: 5px; }
-    .cast-item { background: #fff; border: 1px solid #ddd; padding: 10px; margin-bottom: 8px; border-radius: 8px; }
-    .cast-header { display: flex; justify-content: space-between; align-items: center; font-weight: 900; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 5px; }
-    .cast-members { display: flex; flex-wrap: wrap; gap: 5px; }
-    .cast-member-pill { background: #eee; font-size: 0.7rem; padding: 3px 8px; border-radius: 4px; display: flex; align-items: center; gap: 5px; }
-    .selection-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 8px; max-height: 50vh; overflow-y: auto; padding: 5px; }
-    .select-item { text-align: center; cursor: pointer; padding: 5px; border-radius: 8px; border: 1px solid transparent; }
-    .select-item:hover { background: #f0f0f0; }
-    .select-item.selected { background: #e8f5e9; border-color: var(--primary); }
-    .select-item img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #ddd; }
-    .select-item div { font-size: 0.7rem; font-weight: 700; margin-top: 4px; line-height: 1.1; }
-    .builder-modal-header { padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: #fff; z-index: 10; }
-    .builder-stage-area { padding: 20px; }
-    .rows-panel { margin-top: 10px; padding: 12px; border: 1px solid #eee; border-radius: 12px; background: #fafafa; }
-    .rows-panel .rowline { display: flex; gap: 10px; align-items: center; margin-top: 10px; }
-    .row-tag { min-width: 92px; font-size: .75rem; font-weight: 900; color: #444; text-transform: uppercase; }
-    .slots-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; padding: 18px; border: 2px dashed #ddd; margin-top: 15px; border-radius: 12px; background: #fafafa; }
-    .rows-wrap { display: flex; flex-direction: column; gap: 14px; width: 100%; }
-    .slots-row { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
-    .slot { width: 74px; text-align: center; position: relative; cursor: pointer; transition: transform .2s; }
-    .slot:active { transform: scale(.92); }
-    .slot-circle { width: 64px; height: 64px; border-radius: 50%; background: #fff; border: 2px solid #ddd; display: flex; justify-content: center; align-items: center; margin: 0 auto; overflow: hidden; position: relative; }
-    .slot.is-center .slot-circle { border-color: #e91e63; z-index: 2; box-shadow: 0 0 0 4px rgba(233, 30, 99, .4); transform: scale(1.05); }
-    .slot-badge { position: absolute; bottom: 18px; right: 2px; background: #333; color: #fff; width: 20px; height: 20px; font-size: .65rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 5; border: 2px solid #fff; font-weight: 900; }
-    .slot.is-center .slot-badge { background: #e91e63; }
-    .slot img { width: 100%; height: 100%; object-fit: cover; }
-    .slot-name { font-size: .68rem; margin-top: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 900; }
-    .track-item { background: #fff0f5; padding: 10px 12px; border-radius: 10px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #ffc1e3; gap: 10px; }
-    .track-info { flex: 1; }
-    .track-actions { display: flex; gap: 4px; align-items: center; }
-    .btn-icon { border: none; background: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #555; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05); }
-    .btn-icon.delete { color: #f44336; background: #ffebee; }
-    .badge { font-size: .72rem; font-weight: 900; border-radius: 999px; padding: 4px 10px; background: #333; color: #fff; text-transform: uppercase; display: inline-block; margin-left: 6px; }
+    :root { --primary: #8ACE00; --black: #000000; --bg: #f4f4f4; --border: 2px solid #000; --shadow: 4px 4px 0px #000; --radius: 16px; }
+    * { margin: 0; padding: 0; box-sizing: border-box; outline: none; }
+    body { background-color: var(--bg); color: var(--black); font-family: 'Roboto', sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 20px; }
+    h1, h2, h3, .font-head { font-family: 'Montserrat', sans-serif; font-weight: 900; text-transform: uppercase; letter-spacing: -0.5px; }
+
+    .header-logo { font-size: 2rem; font-weight: 900; font-style: italic; margin-bottom: 20px; text-align: center; }
+    .header-logo span { color: var(--primary); }
+    .form-card { background: #fff; border: var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 25px 20px; width: 100%; max-width: 450px; }
+    .form-group { margin-bottom: 15px; }
+    label { display: block; font-size: 0.75rem; font-weight: 900; color: #555; text-transform: uppercase; margin-bottom: 5px; }
+    input[type="text"], select, textarea { width: 100%; padding: 12px; border: var(--border); border-radius: 8px; font-family: inherit; font-weight: 700; font-size: 1rem; background: #fafafa; transition: 0.2s; }
+    input[type="text"]:focus, select:focus, textarea:focus { background: #fff; border-color: var(--primary); }
+
+    .photo-upload-area { display: flex; align-items: center; gap: 15px; margin-bottom: 10px; }
+    .photo-preview { width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--primary); background: #eee; object-fit: cover; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #aaa; overflow: hidden; }
+    .photo-preview img { width: 100%; height: 100%; object-fit: cover; display: none; }
+    .btn-upload { flex: 1; background: #000; color: #fff; border: var(--border); padding: 10px; border-radius: 8px; font-weight: 900; cursor: pointer; text-transform: uppercase; font-size: 0.8rem; }
+    .upload-status { font-size: 0.7rem; font-weight: 900; color: var(--primary); margin-top: 5px; }
+
+    .btn-submit { background: var(--primary); color: #000; border: var(--border); padding: 15px; border-radius: 8px; font-weight: 900; font-size: 1.1rem; width: 100%; cursor: pointer; box-shadow: 2px 2px 0 #000; text-transform: uppercase; margin-top: 10px; transition: transform 0.1s; }
+    .btn-submit:active { transform: scale(0.98); box-shadow: 0 0 0 #000; }
+
+    #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); z-index: 30000; display: none; justify-content: center; align-items: center; flex-direction: column; }
+    .spinner { border: 6px solid #f3f3f3; border-top: 6px solid var(--primary); border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite; margin-bottom: 15px; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    .loading-text { font-family: 'Montserrat'; font-weight: 900; color: #000; text-transform: uppercase; font-size: 1.2rem; }
+    .success-box { display: none; text-align: center; padding: 30px 10px; }
+    .success-box i { font-size: 4rem; color: var(--primary); margin-bottom: 15px; }
   </style>
 </head>
 <body>
-  <div class="header">
-      <button class="menu-toggle" onclick="toggleMenu()">☰</button> ZAP48 Admin <div style="width: 24px;"></div> 
-  </div>
-  <div class="mobile-menu-overlay" onclick="toggleMenu()"></div>
-  <div class="mobile-menu" id="mobileMenu">
-      <button class="mobile-menu-close" onclick="toggleMenu()">✕</button>
-      <div class="mobile-menu-item" onclick="nav('news', this)"><i class="fas fa-newspaper"></i> Notícias</div>
-      <div class="mobile-menu-item" onclick="nav('disco', this)"><i class="fas fa-plus-circle"></i> Add Música</div>
-      <div class="mobile-menu-item" onclick="nav('managedisco', this)"><i class="fas fa-edit"></i> Editar Música</div>
-      <div class="mobile-menu-item" onclick="nav('stages', this)"><i class="fas fa-theater-masks"></i> Stage</div>
-      <div class="mobile-menu-item" onclick="nav('members', this)"><i class="fas fa-user-plus"></i> Novo Membro</div>
-      <div class="mobile-menu-item" onclick="nav('manage', this)"><i class="fas fa-user-edit"></i> Editar Membro</div>
-  </div>
-  <div id="loading-overlay">
-    <div class="spinner"></div><div id="loading-text">Processando...</div>
-  </div>
 
-  <div id="tab-news" class="section">
-    <div class="card">
-      <h2>📢 Nova Notícia</h2>
-      <form onsubmit="saveNews(event)">
-        <label>Título</label><input id="n-title" required />
-        <label>Categoria</label><select id="n-cat"><option>Release</option><option>Event</option><option>Notice</option><option>Theater</option></select>
-        <label>Data</label><input type="date" id="n-date" required />
-        <label>Conteúdo</label><textarea id="n-text" rows="5"></textarea>
-        <button class="btn-main">Publicar</button>
-      </form>
-    </div>
-  </div>
+  <div id="loading-overlay"><div class="spinner"></div><div class="loading-text" id="loading-text">Enviando...</div></div>
 
-  <div id="tab-disco" class="section">
-    <div class="card">
-      <h2>💿 Adicionar Música</h2>
-      <form onsubmit="saveDisco(event)">
-        <label>Título</label><input id="d-title" required placeholder="Ex: 10th Single" />
-        <div style="display:flex; gap:10px;">
-          <div style="flex:1"><label>Tipo</label><select id="d-type"><option>Single</option><option>Album</option><option>Stage</option></select></div>
-          <div style="flex:1"><label>Data</label><input type="date" id="d-date" required /></div>
+  <div class="header-logo">ZAP<span>48</span></div>
+
+  <div class="form-card" id="register-card">
+    <h2 style="text-align: center; margin-bottom: 20px; font-size: 1.3rem;">Registro de Membro</h2>
+    
+    <form id="registro-form" onsubmit="submitForm(event)">
+      <div class="form-group">
+        <label>Foto de Perfil</label>
+        <div class="photo-upload-area">
+          <div class="photo-preview" id="photo-preview-circle"><i class="fas fa-camera" id="photo-icon"></i><img id="p-preview-img" src=""></div>
+          <div>
+            <input type="file" id="f-photo-file" style="display:none" accept="image/*" onchange="handleImageUpload(this)">
+            <button type="button" class="btn-upload" onclick="document.getElementById('f-photo-file').click()"><i class="fas fa-upload"></i> Escolher Foto</button>
+            <div id="upload-status" class="upload-status"></div>
+            <input type="hidden" id="f-photo-url" required>
+          </div>
         </div>
-        <label>Center (Auto)</label><input id="d-center" readonly style="background:#eee;" />
-        <label>Capa (URL ou Upload)</label>
-        <div class="input-group">
-          <input id="d-cover" placeholder="https://..." required />
-          <input type="file" id="d-cover-file" style="display:none" accept="image/*" onchange="uploadImage(this, 'd-cover', 'd-upload-status')" />
-          <button type="button" class="btn-upload" onclick="document.getElementById('d-cover-file').click()"><i class="fas fa-upload"></i></button>
+      </div>
+
+      <div class="form-group"><label>Nome Artístico</label><input type="text" id="f-nome" placeholder="Digite seu nome" required></div>
+
+      <div style="display: flex; gap: 10px;">
+        <div class="form-group" style="flex: 1;">
+          <label>Time</label>
+          <select id="f-time" required>
+            <option value="" disabled selected>Selecione...</option>
+            <option value="Team Kenkyuusei/SEEDs">Team Kenkyuusei/SEEDs</option>
+            <option value="Team Z">Team Z</option>
+            <option value="Team AII">Team AII</option>
+            <option value="Team P">Team P</option>
+          </select>
         </div>
-        <div id="d-upload-status" class="upload-status"></div>
-        <div style="margin-top:16px; border-top:1px solid #eee; padding-top:14px;">
-          <label>Músicas & Formações</label>
-          <div id="tracks-list"><div style="text-align:center;color:#999;font-size:.85rem;">Vazio</div></div>
-          <button type="button" class="btn-main" style="background:#333; margin-top:10px;" onclick="openBuilder(false)">+ Adicionar Faixa</button>
+
+        <div class="form-group" style="flex: 1;">
+          <label>Geração</label>
+          <select id="f-geracao" required>
+            <option value="" disabled selected>Selecione...</option>
+            <option value="1ª Geração">1ª Geração</option>
+            <option value="2ª Geração">2ª Geração</option>
+            <option value="3ª Geração">3ª Geração</option>
+            <option value="4ª Geração">4ª Geração</option>
+            <option value="5ª Geração">5ª Geração</option>
+          </select>
         </div>
-        <button class="btn-main">Salvar Tudo</button>
-      </form>
-    </div>
+      </div>
+
+      <div class="form-group"><label>Biografia / Perfil</label><textarea id="f-bio" rows="4" placeholder="Escreva um pouco sobre você..."></textarea></div>
+      <button type="submit" class="btn-submit">ENVIAR CADASTRO</button>
+    </form>
   </div>
 
-  <div id="tab-managedisco" class="section">
-    <div class="card">
-      <h2>🗂️ Editar Música</h2>
-      <select id="disco-selector" onchange="fillDiscoEditForm()"><option value="">Carregando...</option></select>
-      <div id="disco-edit-form" style="display:none; margin-top:15px;">
-        <form onsubmit="updateDisco(event)">
-          <label>Título</label><input id="ed-title" readonly style="background:#eee; color:#777;" />
-          <div style="display:flex; gap:10px;">
-            <div style="flex:1"><label>Tipo</label><select id="ed-type"><option>Single</option><option>Album</option><option>Stage</option></select></div>
-            <div style="flex:1"><label>Data</label><input type="date" id="ed-date" required /></div>
-          </div>
-          <label>Center (Auto)</label><input id="ed-center" />
-          <label>Capa</label>
-          <div class="input-group">
-            <input id="ed-cover" required />
-            <input type="file" id="ed-cover-file" style="display:none" accept="image/*" onchange="uploadImage(this, 'ed-cover', 'ed-upload-status')" />
-            <button type="button" class="btn-upload" onclick="document.getElementById('ed-cover-file').click()"><i class="fas fa-upload"></i></button>
-          </div>
-          <div id="ed-upload-status" class="upload-status"></div>
-          <div style="margin-top:20px; border-top:1px solid #eee; padding-top:15px;">
-            <label style="color:#2196f3;">Lista de Músicas (Editar)</label>
-            <div id="ed-tracks-list" style="margin-bottom:15px;"></div>
-            <button type="button" class="btn-ghost" style="font-size:.9rem;" onclick="openBuilder(true)">+ Adicionar Nova Música</button>
-          </div>
-          <button class="btn-main" style="background:#2196f3;">Salvar Alterações</button>
-        </form>
-        <button class="btn-main" style="background:#f44336; margin-top:25px;" onclick="deleteDisco()">Deletar Disco (Cascade)</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="tab-stages" class="section active">
-    <div class="card">
-      <h2>🎭 Gerenciar Stages</h2>
-      <div style="display:flex; gap:10px; margin-bottom:15px;">
-         <button class="btn-ghost" onclick="resetStageForm()" style="flex:1;">+ Novo Stage</button>
-         <select id="stage-selector" onchange="fillStageForm()" style="flex:2;"><option>Carregando...</option></select>
-      </div>
-      <div id="stage-form-container" style="display:none;">
-          <form onsubmit="saveStage(event)">
-            <input type="hidden" id="st-id">
-            <label>Título do Stage</label><input id="st-title" required placeholder="Ex: ZAP48 1st Stage">
-            <label>Subtítulo</label><input id="st-subtitle" placeholder="Ex: 'Party ga Hajimaru yo'">
-            <div style="display:flex; gap:10px;">
-                <div style="flex:1"><label>Estreia</label><input type="date" id="st-date"></div>
-                <div style="flex:1"><label>Status</label><select id="st-status"><option>Em Cartaz</option><option>Finalizado</option><option>Breve</option></select></div>
-            </div>
-            <label>Capa (URL)</label>
-            <div class="input-group">
-                <input id="st-cover" placeholder="https://...">
-                <input type="file" id="st-cover-file" style="display:none" accept="image/*" onchange="uploadImage(this, 'st-cover', 'st-upload-status')" />
-                <button type="button" class="btn-upload" onclick="document.getElementById('st-cover-file').click()"><i class="fas fa-upload"></i></button>
-            </div>
-            <div id="st-upload-status" class="upload-status"></div>
-            <label>Setlist (Texto Longo)</label><textarea id="st-setlist" rows="10" placeholder="Cole a setlist aqui (M01... MC1...)" oninput="updateSetlistPreview()"></textarea>
-            <div id="st-setlist-preview" class="setlist-preview">Pré-visualização...</div>
-            <hr style="margin: 20px 0; border: 0; border-top: 2px dashed #ddd;">
-            <h3>👥 Elencos (Casts)</h3>
-            <div id="st-casts-list"></div>
-            <button type="button" class="btn-ghost" onclick="openCastModal()">+ Adicionar Elenco (Team/Shonichi)</button>
-            <button class="btn-main">Salvar Stage</button>
-            <button type="button" class="btn-main" style="background:#f44336; border-color:#d32f2f; margin-top:10px;" onclick="deleteStage()">Excluir Stage</button>
-          </form>
-      </div>
-    </div>
-  </div>
-
-  <div id="tab-members" class="section">
-    <div class="card">
-      <h2>👤 Novo Membro</h2>
-      <form onsubmit="saveMember(event)">
-        <label>Nome</label><input id="m-name" required />
-        <div style="display:flex; gap:10px;">
-          <div style="flex:1"><label>Time</label><select id="m-team" class="team-select"></select></div>
-          <div style="flex:1"><label>Geração</label><input type="number" id="m-gen" required placeholder="Ex: 1" /></div>
-        </div>
-        <label>Status</label><select id="m-status-select"><option value="Ativa">Ativa</option><option value="Graduada">Graduada</option><option value="Demitida">Demitida</option><option value="Expulsa">Expulsa</option></select>
-        <label>Foto</label>
-        <div class="input-group">
-          <input id="m-photo" placeholder="https://..." required />
-          <input type="file" id="m-photo-file" style="display:none" accept="image/*" onchange="uploadImage(this, 'm-photo', 'm-upload-status')" />
-          <button type="button" class="btn-upload" onclick="document.getElementById('m-photo-file').click()"><i class="fas fa-upload"></i></button>
-        </div>
-        <div id="m-upload-status" class="upload-status"></div>
-        <label>Biografia</label><textarea id="m-bio" rows="4"></textarea>
-        <button class="btn-main">Cadastrar</button>
-      </form>
-    </div>
-  </div>
-
-  <div id="tab-manage" class="section">
-    <div class="card">
-      <h2>✏️ Editar Membro</h2>
-      <input type="text" id="manage-search" placeholder="🔍 Buscar..." oninput="renderManageSelect(this.value)" style="width:100%; margin-bottom:10px;" />
-      <select id="manage-selector" onchange="fillEditForm()"><option value="">Selecione...</option></select>
-      <div id="edit-form" style="display:none; margin-top:15px;">
-        <img id="e-preview" src="" style="width:80px;height:80px;border-radius:50%; margin-bottom:10px; border:2px solid #000;" />
-        <form onsubmit="updateMember(event)">
-          <label>Nome</label><input id="e-name" required />
-          <div style="display:flex; gap:10px;">
-            <div style="flex:1"><label>Time</label><select id="e-team" class="team-select"></select></div>
-            <div style="flex:1"><label>Geração</label><input type="number" id="e-gen" required /></div>
-          </div>
-          <label>Status</label><select id="e-status-select"><option value="Ativa">Ativa</option><option value="Graduada">Graduada</option><option value="Demitida">Demitida</option><option value="Expulsa">Expulsa</option></select>
-          <label>Foto</label>
-          <div class="input-group">
-            <input id="e-photo" required onchange="document.getElementById('e-preview').src=this.value" />
-            <input type="file" id="e-photo-file" style="display:none" accept="image/*" onchange="uploadImage(this, 'e-photo', 'e-upload-status')" />
-            <button type="button" class="btn-upload" onclick="document.getElementById('e-photo-file').click()"><i class="fas fa-upload"></i></button>
-          </div>
-          <div id="e-upload-status" class="upload-status"></div>
-          <label>Bio</label><textarea id="e-bio" rows="4"></textarea>
-          <button class="btn-main">Salvar Alterações</button>
-        </form>
-      </div>
-    </div>
-  </div>
-
-  <div id="cast-modal" class="modal-overlay">
-      <div class="modal-box">
-          <div class="modal-header"><h3>Editar Elenco</h3><button class="close-btn" onclick="closeCastModal()">×</button></div>
-          <label>Nome do Elenco (ex: Team Z)</label><input id="c-name" placeholder="Nome do time/elenco">
-          <div style="margin-top:10px; padding:10px; background:#e3f2fd; border-radius:8px;">
-             <label style="margin-top:0; color:#1565c0; font-size:0.7rem;">⚡ Seleção Rápida de Time</label>
-             <select id="cast-quick-team" class="team-select" style="margin-bottom:0;" onchange="quickSelectTeamForCast(this.value)"></select>
-          </div>
-          <label>Selecionar Membros Individualmente</label><input type="text" id="cast-search" placeholder="Filtrar membros..." oninput="renderCastSelection(this.value)" style="margin-bottom:10px;">
-          <div id="cast-selection-grid" class="selection-grid"></div>
-          <button class="btn-main" onclick="saveCastToStage()">Confirmar Elenco</button>
-      </div>
-  </div>
-
-  <div id="builder-modal" class="modal-overlay">
-    <div class="builder-modal-header modal-header"><span style="font-weight:900;">Formação</span><button onclick="closeBuilder(true)">✕</button></div>
-    <div id="step-1" style="padding:20px; display:block;">
-      <label>Música</label><input id="b-song" placeholder="Nome da faixa" />
-      <label>Tipo</label><select id="b-kind" onchange="toggleKindRules()"><option value="A-side">A-side</option><option value="B-side">B-side</option><option value="Undergirls">Undergirls</option><option value="Unit">Unit</option><option value="Solo">Solo</option></select>
-      <div id="unit-fields" style="display:none;"><label>Nome Unit</label><input id="b-unit-name" /></div>
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:8px;">
-        <div><label>Total</label><input type="number" id="b-total" value="16" min="1" oninput="syncRowsUI()" /></div>
-        <div><label>Centers</label><input type="number" id="b-centers" value="1" min="0" oninput="syncRowsUI()" /></div>
-      </div>
-      <div id="manual-rows" class="rows-panel">
-        <label>Fileiras</label><select id="b-rowcount" onchange="renderRowInputs()"><option value="1">1</option><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option></select>
-        <div id="row-inputs"></div>
-        <div class="row-sum">Soma: <b id="rows-sum" style="color:#00b894;">16</b> / <b id="rows-total">16</b></div>
-      </div>
-      <div style="background: #fff3cd; padding: 10px; border-radius: 8px; margin-top: 15px; border: 1px solid #ffeeba;">
-          <label style="margin-top:0; color:#856404;">✨ Auto-preencher (Música)</label>
-          <select id="b-auto-team" class="team-select" style="margin-bottom:0;"></select>
-      </div>
-      <button class="btn-main" onclick="startStage()">Montar</button>
-    </div>
-    <div id="step-2" class="builder-stage-area stage-area" style="display:none;">
-      <div id="slots" class="slots-container"></div>
-      <div style="display:flex; gap:10px; margin-top:16px;">
-        <button type="button" class="btn-ghost" onclick="backToFormationMenu()">Voltar</button>
-        <button type="button" class="btn-main" style="background:#00b894; margin-top:0;" onclick="finishTrack()">Confirmar</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="member-select-modal" class="modal-overlay">
-    <div class="modal-box">
-      <div class="modal-header"><h3>Escolha</h3><button class="close-btn" onclick="closeMemberModal()">✕</button></div>
-      <input id="member-search" placeholder="Buscar..." oninput="renderMemberSelectionList(this.value)" style="width:100%; margin-bottom:10px;" />
-      <div id="selection-list" class="selection-grid"></div>
-      <button onclick="clearSlot()" class="btn-main" style="background:#f44336; margin-top:10px;">Remover (Vazio)</button>
-    </div>
-  </div>
-
-  <div class="bottom-nav">
-    <button class="nav-item active" onclick="nav('stages', this)"><i class="fas fa-theater-masks"></i>Stage</button>
-    <button class="nav-item" onclick="nav('members', this)"><i class="fas fa-user-plus"></i>Add</button>
-    <button class="nav-item" onclick="nav('manage', this)"><i class="fas fa-users-cog"></i>Edit</button>
+  <div class="form-card success-box" id="success-card">
+      <i class="fas fa-check-circle"></i><h2>Cadastro Concluído!</h2>
+      <p style="color: #666; margin-top: 10px; font-weight: 500;">Você já foi adicionada ao banco de dados do ZAP48.</p>
+      <button class="btn-upload" style="margin-top: 20px; width: 100%;" onclick="location.reload()">Cadastrar Outra</button>
   </div>
 
   <script>
-    const TEAM_CONFIG = {"Team Z": "Team Z", "Team AII": "Team AII", "Team P": "Team P", "Team Kenkyuusei": "Team Kenkyuusei", "Graduada": "Graduada"};
-    const SUPABASE_URL = 'https://iooyygtaosshxygnhlco.supabase.co';
+    const SUPABASE_URL = "https://iooyygtaosshxygnhlco.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlvb3l5Z3Rhb3NzaHh5Z25obGNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkwMDEyNTUsImV4cCI6MjA4NDU3NzI1NX0.gfcVtNgn3g1gnFVrtaIqzkWxajYiV_KbtycYsE9OZ0Y";
-    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     const IMGBB_KEY = "81f7ca81cf22d739de576bd1dac7dcc2";
-    const T_MEMBERS="Membros"; const T_STAGES="Stages"; const T_STAGECASTS="Stagecasts"; const T_NEWS="Noticias"; const T_DISCO="Discografia";
 
-    let allMembers=[], allStages=[], allDiscos=[], currentStageCasts=[], editingCastIndex=-1, tracksBuffer=[], builderIsEditMode=false, activeSlot=null, currentEditingDiscoId=null;
+    function showLoading(show, text="Enviando...") { document.getElementById('loading-text').innerText = text; document.getElementById('loading-overlay').style.display = show ? "flex" : "none"; }
 
-    async function init() { await loadMembers(); populateTeamSelects(); await loadStages(); await loadDiscos(); }
-    function populateTeamSelects() { document.querySelectorAll('.team-select').forEach(sel=>{ sel.innerHTML=(sel.id==='b-auto-team'||sel.id==='cast-quick-team')?'<option value="">Nenhum/Selecione...</option>':'<option value="">Selecione...</option>'; for(let k in TEAM_CONFIG) sel.innerHTML+=`<option value="${TEAM_CONFIG[k]}">${TEAM_CONFIG[k]}</option>`; }); }
-    function nav(id, el) { document.querySelectorAll('.section').forEach(s=>s.classList.remove('active')); document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active')); $('tab-'+id).classList.add('active'); if(el)el.classList.add('active'); const m=$('mobileMenu'); if(m.classList.contains('open')) toggleMenu(); }
-    function toggleMenu() { const m=$('mobileMenu'), o=document.querySelector('.mobile-menu-overlay'); if(m.classList.contains('open')){m.classList.remove('open');o.style.display='none';}else{m.classList.add('open');o.style.display='block';} }
-    function $(id){return document.getElementById(id);} function val(id){return $(id).value;} function showLoading(show){$('loading-overlay').style.display=show?'flex':'none';}
-
-    // DB
-    async function loadMembers() { const {data}=await _supabase.from(T_MEMBERS).select('*').order('Nome'); allMembers=data||[]; renderManageSelect(); }
-    async function loadStages() { const {data}=await _supabase.from(T_STAGES).select('*').order('id',{ascending:false}); allStages=data||[]; const s=$('stage-selector'); s.innerHTML='<option value="">Selecione para editar...</option>'; allStages.forEach(st=>s.innerHTML+=`<option value="${st.id}">${st.Titulo}</option>`); }
-    async function loadDiscos() { const {data}=await _supabase.from(T_DISCO).select('*').order('Data',{ascending:false}); allDiscos=data||[]; const s=$('disco-selector'); s.innerHTML='<option value="">Selecione...</option>'; allDiscos.forEach(d=>s.innerHTML+=`<option value="${d.id}">${d.Titulo}</option>`); }
-
-    // STAGE LOGIC
-    function resetStageForm() { $('stage-form-container').style.display='block'; $('st-id').value=''; $('st-title').value=''; $('st-subtitle').value=''; $('st-date').value=''; $('st-cover').value=''; $('st-setlist').value=''; currentStageCasts=[]; updateSetlistPreview(); renderStageCasts(); $('stage-selector').value=""; }
-    async function fillStageForm() { const id=$('stage-selector').value; if(!id)return resetStageForm(); const s=allStages.find(x=>x.id==id); if(!s)return; $('stage-form-container').style.display='block'; $('st-id').value=s.id; $('st-title').value=s.Titulo; $('st-subtitle').value=s.Subtitulo||''; $('st-date').value=s.Estreia; $('st-status').value=s.Status; $('st-cover').value=s.Capa; $('st-setlist').value=s.Setlist||''; const {data}=await _supabase.from(T_STAGECASTS).select('*').eq('stage_id',id); currentStageCasts=data||[]; updateSetlistPreview(); renderStageCasts(); }
-    async function saveStage(e) { e.preventDefault(); showLoading(true); const id=$('st-id').value; const d={Titulo:$('st-title').value, Subtitulo:$('st-subtitle').value, Estreia:$('st-date').value, Status:$('st-status').value, Capa:$('st-cover').value, Setlist:$('st-setlist').value}; let sid=id;
-        if(id) await _supabase.from(T_STAGES).update(d).eq('id',id); else { const {data}=await _supabase.from(T_STAGES).insert(d).select(); sid=data[0].id; }
-        if(sid) { await _supabase.from(T_STAGECASTS).delete().eq('stage_id',sid); const casts=currentStageCasts.map(c=>({stage_id:sid, Nome:c.Nome, Membros:JSON.stringify(c.Membros)})); if(casts.length) await _supabase.from(T_STAGECASTS).insert(casts); }
-        await loadStages(); resetStageForm(); alert(id?"Atualizado!":"Criado!"); showLoading(false); }
-    async function deleteStage() { if(!confirm("Deletar?"))return; showLoading(true); const id=$('st-id').value; await _supabase.from(T_STAGECASTS).delete().eq('stage_id',id); await _supabase.from(T_STAGES).delete().eq('id',id); await loadStages(); resetStageForm(); alert("Deletado!"); showLoading(false); }
-    function updateSetlistPreview() { const txt=$('st-setlist').value; $('st-setlist-preview').innerHTML=txt.split('\n').map(l=>{l=l.trim(); if(l.match(/^M\d+/))return `<span class="setlist-m">${l}</span><br>`; if(l.match(/^MC\d+/))return `<span class="setlist-mc">${l}</span><br>`; if(l.toLowerCase().includes('encore'))return `<div class="setlist-header">${l}</div><br>`; return `<div>${l}</div>`;}).join(''); }
-
-    // CAST LOGIC
-    function renderStageCasts() { $('st-casts-list').innerHTML=currentStageCasts.map((c,i)=>`<div class="cast-item"><div class="cast-header"><span>${c.Nome}</span><div><button type="button" onclick="editCast(${i})" style="color:blue;border:none;background:none;cursor:pointer;">Edit</button><button type="button" onclick="currentStageCasts.splice(${i},1);renderStageCasts()" style="color:red;border:none;background:none;cursor:pointer;">X</button></div></div><div class="cast-members">${(typeof c.Membros==='string'?JSON.parse(c.Membros):c.Membros).map(m=>`<span class="cast-member-pill">${m.name}</span>`).join('')}</div></div>`).join(''); }
-    function openCastModal() { $('cast-modal').style.display='flex'; $('c-name').value=''; $('cast-quick-team').value=''; editingCastIndex=-1; renderCastSelection(); }
-    function editCast(i) { editingCastIndex=i; const c=currentStageCasts[i]; $('c-name').value=c.Nome; const ms=typeof c.Membros==='string'?JSON.parse(c.Membros):c.Membros; const s=new Set(ms.map(m=>m.id.toString())); $('cast-modal').style.display='flex'; renderCastSelection('',s); }
-    function closeCastModal() { $('cast-modal').style.display='none'; }
-    function renderCastSelection(q='', sel=new Set()) { const g=$('cast-selection-grid'); g.innerHTML=''; allMembers.filter(m=>['Ativa'].includes(m.Status) && (!q||m.Nome.toLowerCase().includes(q.toLowerCase()))).forEach(m=>{ const d=document.createElement('div'); d.className='select-item '+(sel.has(m.id.toString())?'selected':''); d.innerHTML=`<img src="${m.Foto}"><div>${m.Nome}</div><div>${m.Time}</div>`; d.dataset.id=m.id; d.dataset.name=m.Nome; d.dataset.gen=m.Geracao; d.dataset.team=m.Time; d.onclick=()=>{d.classList.toggle('selected');}; g.appendChild(d); }); }
-    function quickSelectTeamForCast(t) { if(!t)return; if(!$('c-name').value)$('c-name').value=t; document.querySelectorAll('#cast-selection-grid .select-item').forEach(d=>{if(d.dataset.team===t)d.classList.add('selected');}); }
-    function saveCastToStage() { const n=$('c-name').value; if(!n)return alert("Nome?"); const ms=[...document.querySelectorAll('.select-item.selected')].map(e=>({id:e.dataset.id,name:e.dataset.name,gen:e.dataset.gen,isCenter:false})); const d={Nome:n, Membros:ms}; if(editingCastIndex>=0){if(currentStageCasts[editingCastIndex].id)d.id=currentStageCasts[editingCastIndex].id; currentStageCasts[editingCastIndex]=d;}else currentStageCasts.push(d); closeCastModal(); renderStageCasts(); }
-
-    // UPLOAD
-    async function uploadImage(input, tid, sid) { const f=input.files[0]; if(!f)return; $(sid).innerText="⏳..."; try{const b64=await new Promise(r=>{const fr=new FileReader();fr.onload=()=>r(fr.result);fr.readAsDataURL(f)}); const fd=new FormData();fd.append("key",IMGBB_KEY);fd.append("image",String(b64).split(",")[1]); const r=await fetch("https://api.imgbb.com/1/upload",{method:"POST",body:fd}); const d=await r.json(); $(tid).value=d.data.url; $(sid).innerText="✅"; if(tid.includes('photo')||tid.includes('cover'))$('e-preview').src=d.data.url; }catch(e){$(sid).innerText="❌";} }
-
-    // MEMBERS & DISCO
-    async function saveMember(e) { e.preventDefault(); showLoading(true); await _supabase.from(T_MEMBERS).insert({Nome:$('m-name').value, Time:$('m-team').value, Geracao:$('m-gen').value+'ª Geração', Status:$('m-status-select').value, Perfil:$('m-bio').value, Foto:$('m-photo').value}); await loadMembers(); $('m-name').value=''; alert("Salvo!"); showLoading(false); }
-    async function updateMember(e) { e.preventDefault(); showLoading(true); await _supabase.from(T_MEMBERS).update({Nome:$('e-name').value, Time:$('e-team').value, Geracao:$('e-gen').value+'ª Geração', Status:$('e-status-select').value, Perfil:$('e-bio').value, Foto:$('e-photo').value}).eq('id',$('manage-selector').value); await loadMembers(); alert("Atualizado!"); showLoading(false); }
-    function renderManageSelect(q='') { const s=$('manage-selector'); s.innerHTML='<option value="">Selecione...</option>'; allMembers.filter(m=>m.Nome.toLowerCase().includes(q.toLowerCase())).forEach(m=>s.innerHTML+=`<option value="${m.id}">${m.Nome}</option>`); }
-    function fillEditForm() { const m=allMembers.find(x=>x.id==$('manage-selector').value); if(!m){$('edit-form').style.display='none';return;} $('edit-form').style.display='block'; $('e-name').value=m.Nome; $('e-team').value=m.Time; $('e-gen').value=m.Geracao.replace(/\D/g,''); $('e-status-select').value=m.Status; $('e-photo').value=m.Foto; $('e-preview').src=m.Foto; $('e-bio').value=m.Perfil||''; }
-    async function saveDisco(e) { e.preventDefault(); if(!tracksBuffer.length)return alert("Músicas?"); showLoading(true); const h=buildHTML(); const c=tracksBuffer[0]?(tracksBuffer[0].members||[]).filter(m=>m.isCenter).map(m=>m.name).join('&'):''; await _supabase.from(T_DISCO).insert({Titulo:$('d-title').value, Tipo:$('d-type').value, Center:c, Data:$('d-date').value, Capa:$('d-cover').value, Tracklist:h}); await loadDiscos(); $('d-title').value=''; tracksBuffer=[]; updateTracks(false); alert("Salvo!"); showLoading(false); }
-    function fillDiscoEditForm() { const r=allDiscos.find(x=>x.id==$('disco-selector').value); if(!r){$('disco-edit-form').style.display='none';return;} currentEditingDiscoId=r.id; $('disco-edit-form').style.display='block'; $('ed-title').value=r.Titulo; $('ed-type').value=r.Tipo; $('ed-date').value=r.Data; $('ed-center').value=r.Center; $('ed-cover').value=r.Capa; tracksBuffer=parseHTMLToTracks(r.Tracklist||''); updateTracks(true); }
-    async function updateDisco(e) { e.preventDefault(); showLoading(true); const h=buildHTML(); const c=tracksBuffer[0]?(tracksBuffer[0].members||[]).filter(m=>m.isCenter).map(m=>m.name).join('&'):''; await _supabase.from(T_DISCO).update({Tipo:$('ed-type').value, Data:$('ed-date').value, Center:c, Capa:$('ed-cover').value, Tracklist:h}).eq('id',currentEditingDiscoId); await loadDiscos(); alert("Atualizado!"); showLoading(false); }
-    async function saveNews(e) { e.preventDefault(); showLoading(true); await _supabase.from(T_NEWS).insert({Titulo:$('n-title').value, Categoria:$('n-cat').value, Data:$('n-date').value, Texto:$('n-text').value}); $('n-title').value=''; alert("Salvo!"); showLoading(false); }
-
-    // BUILDER
-    function openBuilder(isE) { builderIsEditMode=isE; $('builder-modal').style.display='flex'; $('step-1').style.display='block'; $('step-2').style.display='none'; if(!$('row-inputs').children.length)renderRowInputs(); $('b-song').value=''; $('b-auto-team').value=''; syncRowsUI(); }
-    function closeBuilder() { $('builder-modal').style.display='none'; }
-    function backToFormationMenu() { $('step-2').style.display='none'; $('step-1').style.display='block'; }
-    function syncRowsUI() { $('rows-total').innerText = parseInt(val('b-total'))||0; updateRowsSum(); }
-    function renderRowInputs() { const w=$('row-inputs'), c=parseInt(val('b-rowcount'))||3; w.innerHTML=''; for(let i=0;i<c;i++) w.innerHTML+=`<div class="rowline"><div class="row-tag">${i===0?'Frente':(i===c-1?'Fundo':`Meio ${i}`)}</div><input type="number" min="0" class="row-count-input" value="0" oninput="updateRowsSum()"></div>`; updateRowsSum(); }
-    function updateRowsSum() { const s=[...document.querySelectorAll('.row-count-input')].reduce((a,b)=>a+(parseInt(b.value)||0),0); $('rows-sum').innerText=s; $('rows-sum').style.color=(s===(parseInt(val('b-total'))||0))?'#00b894':'#e91e63'; }
-    function toggleKindRules() { const k=val('b-kind'); $('unit-fields').style.display=(k==='Unit')?'block':'none'; }
-    function startStage() {
-        const t=parseInt(val('b-total'))||0, inps=[...document.querySelectorAll('.row-count-input')].map(i=>parseInt(i.value)||0); if(inps.reduce((a,b)=>a+b,0)!==t) return alert("Soma incorreta.");
-        const c=parseInt(val('b-centers'))||0, auto=$('b-auto-team').value; let ci=[], fillM=[];
-        if(c>0&&inps[0]>0){ const s=Math.floor((inps[0]-c)/2); for(let k=0;k<c;k++) ci.push(s+k); }
-        if(auto) fillM=allMembers.filter(m=>m.Time===auto&&['Ativa'].includes(m.Status)); let fIdx=0;
-        $('slots').innerHTML=''; const rw=document.createElement('div'); rw.className='rows-wrap';
-        for(let r=inps.length-1;r>=0;r--){
-            const rd=document.createElement('div'); rd.className='slots-row'; const isF=(r===0); let sb=1; for(let k=0;k<r;k++)sb+=inps[k];
-            for(let j=0;j<inps[r];j++){
-                const d=document.createElement('div'); d.className='slot'; if(isF&&ci.includes(j))d.classList.add('is-center');
-                let h=`<div class="slot-badge">${sb+j}</div><div class="slot-circle"><i class="fas fa-plus" style="color:#ddd"></i></div><div class="slot-name">-</div>`;
-                let mem=null; if(auto&&fIdx<fillM.length){ mem=fillM[fIdx++]; h=`<div class="slot-badge">${sb+j}</div><div class="slot-circle"><img src="${mem.Foto||'https://placehold.co/100'}"></div><div class="slot-name">${mem.Nome}</div>`; }
-                d.innerHTML=h; if(mem){ d.dataset.id=mem.id; d.dataset.name=mem.Nome; d.dataset.gen=mem.Geracao; } d.onclick=()=>openMemberModalForBuilder(d); rd.appendChild(d);
-            } rw.appendChild(rd);
-        } $('slots').appendChild(rw); $('step-1').style.display='none'; $('step-2').style.display='block';
+    async function handleImageUpload(input) {
+        const file = input.files[0]; if (!file) return;
+        document.getElementById('upload-status').innerText = "⏳ Carregando imagem..."; document.getElementById('upload-status').style.color = "#ff9800";
+        try {
+            const base64 = await new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.onerror = error => reject(error); reader.readAsDataURL(file); });
+            const formData = new FormData(); formData.append("key", IMGBB_KEY); formData.append("image", String(base64).split(",")[1]);
+            const res = await fetch("https://api.imgbb.com/1/upload", { method: "POST", body: formData }); const data = await res.json();
+            if(data.success) {
+                const imageUrl = data.data.url; document.getElementById('f-photo-url').value = imageUrl;
+                document.getElementById('photo-icon').style.display = "none";
+                const imgEl = document.getElementById('p-preview-img'); imgEl.src = imageUrl; imgEl.style.display = "block";
+                document.getElementById('upload-status').innerText = "✅ Foto pronta!"; document.getElementById('upload-status').style.color = "var(--primary)";
+            } else throw new Error("Falha na API ImgBB");
+        } catch(err) { document.getElementById('upload-status').innerText = "❌ Erro ao enviar foto."; document.getElementById('upload-status').style.color = "red"; }
     }
-    function openMemberModalForBuilder(el) { activeSlot=el; $('member-select-modal').style.display='flex'; renderMemberSelectionList(''); }
-    function closeMemberModal() { $('member-select-modal').style.display='none'; activeSlot=null; }
-    function selectMember(m) { if(!activeSlot)return; activeSlot.querySelector('.slot-circle').innerHTML=`<img src="${m.Foto}">`; activeSlot.querySelector('.slot-name').innerText=m.Nome; activeSlot.dataset.id=m.id; activeSlot.dataset.name=m.Nome; activeSlot.dataset.gen=m.Geracao; closeMemberModal(); }
-    function clearSlot() { if(activeSlot){activeSlot.querySelector('.slot-circle').innerHTML='<i class="fas fa-plus"></i>';activeSlot.querySelector('.slot-name').innerText='-';delete activeSlot.dataset.id;} closeMemberModal(); }
-    function finishTrack() { const n=val('b-song').trim(); if(!n)return alert("Nome?"); const s=[...document.querySelectorAll('.slot')].filter(e=>e.dataset.id).map(e=>({id:e.dataset.id,name:e.dataset.name,gen:e.dataset.gen,isCenter:e.classList.contains('is-center')})); if(!s.length)return alert("Vazio?"); tracksBuffer.push({name:n,kind:val('b-kind'),unitName:val('b-unit-name'),members:s,html:null}); updateTracks(builderIsEditMode); closeBuilder(); }
-    function updateTracks(isE) { const c=$(isE?'ed-tracks-list':'tracks-list'); c.innerHTML=tracksBuffer.map((t,i)=>`<div class="track-item"><div class="track-info"><b>${t.name}</b> <span class="badge">${t.kind}</span></div><div class="track-actions"><button type="button" class="btn-icon delete" onclick="tracksBuffer.splice(${i},1);updateTracks(${isE})">✕</button></div></div>`).join('')||'<div style="text-align:center;color:#999;">Vazio</div>'; }
-    function buildHTML() { let h=`<div class="modal-nav"><button class="modal-nav-btn active">Tracklist</button></div><div class="details-content"><ol class="tracklist">`, f=`<div class="modal-section">`; tracksBuffer.forEach(t=>{ h+=`<li><a>${t.name}</a> <span class="label ${normalizeKind(t.kind)}">${t.kind}</span></li>`; f+=`<div class="formation-group"><div class="formation-title">${t.name}</div><div class="member-grid">`+(t.members||[]).map(m=>`<a class="member-card-static ${m.isCenter?'is-center':''}"><div class="member-photo"><img src="${allMembers.find(am=>am.id==m.id)?.Foto||'https://placehold.co/100'}"></div><div class="member-info"><h3>${m.name}</h3><p>${m.gen}</p></div></a>`).join('')+`</div></div><hr>`; }); return h+`</ol></div>`+f+`</div><div id="ctl48-formation-data" style="display:none;">${JSON.stringify(tracksBuffer)}</div>`; }
-    function normalizeKind(k){const s=(k||'').toLowerCase(); return s.includes('a-side')?'a-side':s.includes('under')?'undergirls':s.includes('unit')?'unit':'b-side';}
-    function parseHTMLToTracks(h){const d=document.createElement('div');d.innerHTML=h;const e=d.querySelector('#ctl48-formation-data');return e?JSON.parse(e.innerText):[];}
 
-    init();
+    async function submitForm(event) {
+        event.preventDefault();
+        const photoUrl = document.getElementById('f-photo-url').value;
+        if(!photoUrl) { alert("Por favor, faça o upload de uma foto de perfil primeiro!"); return; }
+        showLoading(true, "Registrando membro...");
+        const payload = {
+            Nome: document.getElementById('f-nome').value.trim(), Time: document.getElementById('f-time').value,
+            Geracao: document.getElementById('f-geracao').value, Status: "Ativa", Foto: photoUrl, Perfil: document.getElementById('f-bio').value.trim(),
+            Participacoes: "[]", Historico_Times: "[]"
+        };
+        try { const { error } = await _sb.from("Membros").insert([payload]); if (error) throw error;
+            document.getElementById('register-card').style.display = "none"; document.getElementById('success-card').style.display = "block";
+        } catch (error) { alert("Erro ao enviar cadastro: " + error.message); }
+        showLoading(false);
+    }
   </script>
 </body>
 </html>
